@@ -2,8 +2,9 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>WebXR AR Prototype</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no" />
+    <title>O3Measure - WebXR AR Measuring Tool</title>
     <style>
       html, body { margin: 0; padding: 0; overflow: hidden; }
       #instructions {
@@ -18,10 +19,71 @@
         font-family: sans-serif;
         z-index: 100;
       }
+      #overlay {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0);
+        z-index: 10;
+        pointer-events: none;
+      }
+      #start-screen {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background: linear-gradient(to bottom, #222, #111);
+        color: white;
+        text-align: center;
+        font-family: Arial, sans-serif;
+      }
+      #start-screen h1 {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+      }
+      #start-screen p {
+        margin-bottom: 2rem;
+        max-width: 80%;
+        line-height: 1.5;
+      }
+      .instructions {
+        margin-top: 2rem;
+        max-width: 80%;
+        text-align: left;
+      }
+      .instructions h2 {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+      }
+      .instructions ol {
+        padding-left: 1.5rem;
+      }
+      .instructions li {
+        margin-bottom: 0.5rem;
+      }
     </style>
   </head>
   <body>
+    <div id="start-screen">
+      <h1>O3Measure</h1>
+      <p>AR application to help measure and visualize where to hang objects on walls</p>
+      
+      <div class="instructions">
+        <h2>Instructions:</h2>
+        <ol>
+          <li><strong>Wall Selection:</strong> Place 3 dots on a wall to define its surface</li>
+          <li><strong>Object Definition:</strong> Place 3 dots to define your object's dimensions</li>
+          <li><strong>Anchor Points:</strong> Place 1-4 dots for mounting points</li>
+          <li><strong>Wall Projection:</strong> Drag and position the object visualization on the wall</li>
+        </ol>
+        <p>Use the UI panel on your left controller and interact with it using your right controller</p>
+      </div>
+    </div>
+    
     <div id="instructions">Initializing...</div>
+    <div id="overlay"></div>
+    
     <script type="module" src="src/main.js"></script>
   </body>
 </html>
