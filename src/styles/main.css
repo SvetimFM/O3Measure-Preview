@@ -1,0 +1,115 @@
+/**
+ * Main styles for O3Measure AR application
+ */
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  background-color: #222;
+  color: white;
+  overflow: hidden;
+}
+
+/* UI overlay for AR mode */
+.ui-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none; /* Allow clicks to pass through to AR */
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Status indicator */
+.status {
+  position: fixed;
+  top: 20px;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  color: white;
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 10px;
+  font-family: Arial, sans-serif;
+  transition: all 0.3s ease;
+}
+
+/* AR button */
+.ar-button {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #15ACCF;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  pointer-events: auto; /* Make button clickable */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s ease;
+}
+
+.ar-button:hover {
+  background-color: #0f8fad;
+}
+
+.ar-button:active {
+  transform: translateX(-50%) scale(0.98);
+}
+
+/* Gesture status display */
+.gesture-status {
+  position: fixed;
+  top: 70px;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  color: #15ACCF;
+  background-color: rgba(0, 0, 0, 0.3);
+  padding: 8px;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  opacity: 0.8;
+}
+
+.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Visual effect for hands reappearing */
+@keyframes hand-reappear-pulse {
+  0% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.2;
+  }
+}
+
+/* Class applied to hands when they're restored */
+.hand-restored {
+  animation: hand-reappear-pulse 0.5s ease-in-out 3;
+}
+
+/* Hide A-Frame VR button on very small screens (better for Quest browser) */
+@media (max-width: 400px) {
+  .a-enter-vr {
+    opacity: 0.7;
+    transform: scale(0.8);
+  }
+}

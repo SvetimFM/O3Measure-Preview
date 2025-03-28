@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <title>O3Measure - Hand Tracking AR Measuring Tool</title>
+    
+    <!-- Load A-Frame script -->
+    <script src="https://aframe.io/releases/1.7.0/aframe.min.js"></script>
+    
+    <!-- Include main CSS -->
+    <link rel="stylesheet" href="/src/styles/main.css">
+  </head>
+  <body>
+    <!-- AR UI overlay -->
+    <div id="overlay-ui" class="ui-overlay">
+      <!-- Status indicator -->
+      <div class="status" id="status">Loading O3Measure...</div>
+      
+      <!-- AR button for mobile devices -->
+      <button id="ar-button" class="ar-button">Start AR</button>
+      
+      <!-- Hand gesture indicator -->
+      <div class="gesture-status" id="gesture-status">No gesture detected</div>
+    </div>
+    
+    <!-- A-Frame Scene -->
+    <a-scene 
+      webxr="optionalFeatures: hit-test, local-floor, hand-tracking, dom-overlay, anchors; 
+             requiredFeatures: local-floor; 
+             overlayElement: #overlay-ui;
+             referenceSpaceType: local-floor;
+             matchDeviceSize: true"
+      renderer="antialias: true; colorManagement: true; precision: high"
+      loading-screen="enabled: true; dotsColor: #15ACCF; backgroundColor: #000000"
+      vr-mode-ui="enabled: true; enterARButton: #ar-button"
+      enhanced-controller-system="debug: true; preferHandTracking: true"
+      scene-manager
+      ar-hit-test="target: #reticle; enabled: true">
+      
+      <!-- Asset management system -->
+      <a-assets>
+        <!-- Grid texture for floor (when in VR mode) -->
+        <img id="grid" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAFmSURBVHic7ZoxSgNREIa/JyJYWFhY2FiIhYVgYeFJ9AJWXsNCEE9gZSV4ActFvIBgYWFhIRYWYmEhFhZP1oBmzZoie4Gd7/svTObNP8XXzEymUCgUCoV/w12I+5hkXANzwFegr0TkQ5KprFtgCDzHElkBTsDiDrQMXAPfvQllWiZZnRbJfFwyJxmfMT3Zt8AQuF+TDNCVbL/WCx14jOzJpU+xZcYT0KstOQc+ovyFpU+xZXqSPdWWnAHvUf7K0qfYMl3JhhiVZcm+4vRPrH2KLbMpWR9ygKTDEQlHNm2ZfclGmIoNOXAY8k5tmd4faYRJGZDj8ZRkexiVXWAGvDGehD9OJNtJspWU7tNcAzvAJXAGHAXm7wMPQCtSHQIdYALMA0fAd6WPUZLHRquS3YvQn5LddKA7B4p/hjnQzm2hYc6BVm4LDbMELHJbaZAf4Bi4ym2kUCgUCoUm+QUwMqgtwwNB5gAAAABJRU5ErkJggg==">
+      </a-assets>
+      
+      <!-- Camera rig with hands -->
+      <a-entity id="cameraRig" position="0 0 0">
+        <!-- Camera -->
+        <a-camera position="0 1.6 0" 
+                  look-controls="pointerLockEnabled: false" 
+                  wasd-controls="enabled: false">
+        </a-camera>
+        
+        <!-- Left hand with hand tracking controls -->
+        <a-entity id="leftHand"
+                  hand-controls="hand: left; handModelStyle: highPoly; color: #15ACCF"
+                  hand-tracking-controls="hand: left; modelColor: #15ACCF; materialType: silhouette;"
+                  class="tracked-hands">
+        </a-entity>
+        
+        <!-- Right hand with hand tracking controls and raycaster -->
+        <a-entity id="rightHand"
+                  hand-controls="hand: right; handModelStyle: highPoly; color: #15ACCF"
+                  hand-tracking-controls="hand: right; modelColor: #15ACCF; materialType: silhouette;"
+                  laser-controls="hand: right"
+                  raycaster="showLine: true; far: 10; lineColor: #118A7E; lineOpacity: 0.7"
+                  class="tracked-hands">
+        </a-entity>
+      </a-entity>
+      
+      <!-- Debug indicators for gesture tracking -->
+      <a-entity id="debugVisuals" position="0 0 0" visible="true">
+        <!-- Visualization elements will be added dynamically -->
+      </a-entity>
+      
+      <!-- AR hit test reticle -->
+      <a-entity id="reticle" 
+                gltf-model="https://cdn.aframe.io/examples/ar/reticle.gltf"
+                scale="0.8 0.8 0.8"
+                position="0 0 -2"
+                rotation="-90 0 0"
+                visible="false"></a-entity>
+      
+      <!-- Basic lighting -->
+      <a-entity light="type: ambient; intensity: 0.8"></a-entity>
+      <a-entity light="type: directional; intensity: 0.6" position="1 1 1"></a-entity>
+      
+      <!-- Basic environment (visible in VR only) -->
+      <a-plane id="ground"
+               position="0 0 0" 
+               rotation="-90 0 0" 
+               width="20" 
+               height="20" 
+               material="src: #grid; repeat: 10 10; transparent: true; opacity: 0.5"
+               shadow="receive: true"
+               visible="false"></a-plane>
+    </a-scene>
+    <a-entity hand-tracking-controls="hand: left"></a-entity>
+    <a-entity hand-tracking-controls="hand: right"></a-entity>
+    <!-- Script entry point -->
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

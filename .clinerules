@@ -1,0 +1,66 @@
+# O3Measure Project Rules
+
+## Critical Implementation Patterns
+
+### Feature-Oriented Architecture
+- Implement features as self-contained components
+- Features manage their own state internally
+- Features communicate via A-Frame's event system
+- Features activate/deactivate via menu system
+
+### Implementation Strategy
+- Follow the tracer bullet approach outlined in TASKS.md
+- Focus on getting core functionality working first
+- Implementation follows the phased approach in TASKS.md 
+- Test on real devices early and often
+- Start with scaffolding that demonstrates the architecture
+
+### A-Frame Patterns
+- Use component schemas for public API
+- Store internal state in component instances
+- Lazily initialize UI elements when activated
+- Clean up when features are deactivated
+- Communicate through scene-level events
+
+## User Preferences
+
+### Documentation Focus
+- Maintain memory-bank and Documentation directories
+- Update progress.md after completing tasks
+- Keep activeContext.md current
+- Add documentation for each feature as implemented
+
+### Code Organization
+- Features in their own directories
+- Related components grouped together
+- Clear separation between features and shared utilities
+- Consistent component structure across features
+
+## Project-Specific Patterns
+
+### AR Interaction
+- Hit testing via WebXR API
+- Controller-based input with ray casting
+- Wrist-mounted UI on left controller
+- Interaction ray from right controller
+- Feature activation via menu system
+
+### Measurement Flow
+1. Wall Selection → Object Definition → Anchor Points → Wall Projection
+2. Each step must be completed before proceeding
+3. User can return to previous steps
+4. Results from each step are stored for later use
+
+## Known Challenges
+
+### WebXR Development
+- AR testing requires physical devices
+- Performance optimization is critical
+- Hit testing accuracy varies by device
+- Plane detection dependent on lighting and textures
+
+### A-Frame Considerations
+- Limited debugging tools for WebXR
+- Performance impact of many entities
+- Component lifecycle management
+- Event handling across components
