@@ -128,6 +128,9 @@ AFRAME.registerComponent('pressable', {
     if (withinXBounds && withinYBounds) {
       // If within X and Y boundaries, just return Z distance
       return Math.abs(this.tempVector.z - this.worldPosition.z);
+    } else {
+      // Outside bounds, use distance to closest point on box
+      return this.boundingBox.distanceToPoint(this.tempVector);
     }
   }
 });

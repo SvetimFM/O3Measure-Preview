@@ -64,8 +64,8 @@ document.addEventListener('DOMContentLoaded', function() {
       console.log('Creating menu panel entity');
       const menuPanel = document.createElement('a-entity');
       menuPanel.setAttribute('menu-panel', {
-        width: 0.30,
-        height: 0.20,
+        width: 0.15,    // Half the original width (0.30 * 0.5)
+        height: 0.192,  // Half the original height (0.384 * 0.5)
         color: '#333333',
         borderColor: '#db8814',
         grabbable: true

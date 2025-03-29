@@ -51,7 +51,7 @@ AFRAME.registerComponent('button', {
     this.buttonText.setAttribute('position', '0 0 0.001');
     this.buttonText.setAttribute('width', data.width * 10); // Scale text appropriately
     this.buttonText.setAttribute('wrap-count', 20);
-    this.buttonText.setAttribute('scale', '0.05 0.05 0.05');
+    this.buttonText.setAttribute('scale', '0.07 0.07 0.07'); // Enlarged text
     
     // Add elements to button entity
     el.appendChild(this.buttonBackground);

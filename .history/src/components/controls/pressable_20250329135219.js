@@ -8,7 +8,7 @@
 AFRAME.registerComponent('pressable', {
   schema: {
     pressDistance: { default: 0.008 },  // Z-distance for press detection
-    hoverDistance: { default: 0.025 }   // Z-distance for hover detection
+    hoverDistance: { default: 0.05 }   // Z-distance for hover detection
   },
 
   init: function () {
@@ -128,6 +128,9 @@ AFRAME.registerComponent('pressable', {
     if (withinXBounds && withinYBounds) {
       // If within X and Y boundaries, just return Z distance
       return Math.abs(this.tempVector.z - this.worldPosition.z);
+    } else {
+      // Outside bounds, use distance to closest point on box
+      return this.boundingBox.distanceToPoint(this.tempVector);
     }
   }
 });
