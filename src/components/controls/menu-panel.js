@@ -101,7 +101,7 @@ AFRAME.registerComponent('menu-panel', {
     
     // Add subtitle
     const subtitle = document.createElement('a-text');
-    subtitle.setAttribute('value', 'Wrist UI Demo');
+    subtitle.setAttribute('value', 'O3Measure Menu');
     subtitle.setAttribute('align', 'center');
     subtitle.setAttribute('position', `0 0.02 0.004`); // Position in front of panel
     subtitle.setAttribute('color', '#AAAAAA');
@@ -122,28 +122,24 @@ AFRAME.registerComponent('menu-panel', {
     divider.setAttribute('position', `0 -0.02 0.004`); // Position in front of panel
     this.container.appendChild(divider); // Attach to container
     
-    // Add a test button
-    const button = document.createElement('a-entity');
-    button.setAttribute('geometry', {
-      primitive: 'plane',
+    // Add a proper interactive button using the button component
+    const startButton = document.createElement('a-entity');
+    startButton.setAttribute('button', {
+      label: 'Start',
       width: 0.08,
-      height: 0.04
-    });
-    button.setAttribute('material', {
+      height: 0.04,
       color: '#4285F4',
-      shader: 'flat'
+      textColor: '#FFFFFF'
     });
-    button.setAttribute('position', '0 -0.06 0.004'); // Position in front of panel
-    this.container.appendChild(button); // Attach to container
+    startButton.setAttribute('position', '0 -0.06 0.004'); // Position in front of panel
     
-    // Add button text
-    const buttonText = document.createElement('a-text');
-    buttonText.setAttribute('value', 'Start');
-    buttonText.setAttribute('align', 'center');
-    buttonText.setAttribute('position', '0 -0.06 0.005'); // Position in front of button
-    buttonText.setAttribute('color', '#FFFFFF');
-    buttonText.setAttribute('scale', '0.03 0.03 0.03');
-    this.container.appendChild(buttonText); // Attach to container
+    // Add event listener for button press
+    startButton.addEventListener('button-press-ended', (event) => {
+      console.log('Menu button pressed:', event.detail.label);
+      // We can add specific functionality here when the button is pressed
+    });
+    
+    this.container.appendChild(startButton); // Attach to container
   },
   
   positionInFrontOfUser: function() {

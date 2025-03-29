@@ -5,6 +5,8 @@
 
 // Control Components
 import './controls/menu-panel.js';
+import './controls/button.js';
+import './controls/pressable.js';
 
 // Initialize all components
 console.log('O3Measure components initialized');

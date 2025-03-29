@@ -1,11 +1,11 @@
 /**
- * UI Button Component
+ * Button Component
  * 
  * Creates an interactive button that can be used with hand tracking
  * Following A-Frame's hand tracking examples
  */
 
-AFRAME.registerComponent('ui-button', {
+AFRAME.registerComponent('button', {
   schema: {
     label: {type: 'string', default: 'Button'},
     width: {type: 'number', default: 0.08},
