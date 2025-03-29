@@ -28,8 +28,8 @@ document.addEventListener('DOMContentLoaded', function() {
     statusElement.textContent = 'Ready! Enter AR to begin hand tracking.';
     console.log('Scene loaded successfully');
     
-    // Set up menu panel
-    setupMenuPanel();
+    // Set up wrist UI
+    setupWristUI();
   });
   
   // AR button setup
@@ -52,42 +52,23 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('Entered AR mode');
   });
   
-  // Set up menu panel in front of the user
-  function setupMenuPanel() {
-    console.log('Setting up menu panel');
+  // Set up wrist UI on left hand
+  function setupWristUI() {
+    const leftHand = document.querySelector('#leftHand');
     
-    const scene = document.querySelector('a-scene');
-    console.log('Scene element:', scene);
-    
-    if (scene) {
-      // Create menu panel as a direct child of the scene
-      console.log('Creating menu panel entity');
-      const menuPanel = document.createElement('a-entity');
-      menuPanel.setAttribute('menu-panel', {
-        width: 0.30,
-        height: 0.20,
-        color: '#333333',
-        borderColor: '#db8814',
-        grabbable: true
-      });
-      menuPanel.setAttribute('id', 'menuPanel');
-      console.log('Menu panel entity created');
+    if (leftHand) {
+      // Create a parent entity to position the UI higher up
+      const uiParent = document.createElement('a-entity');
+      uiParent.setAttribute('offset', '20 20 20'); // Raise it 20cm above the wrist position
+      leftHand.appendChild(uiParent);
       
-      // Add to scene directly
-      scene.appendChild(menuPanel);
-      console.log('Menu panel added to scene');
-      
-      // Verify the component was applied
-      setTimeout(() => {
-        const component = menuPanel.components['menu-panel'];
-        console.log('Menu panel component after initialization:', component);
-        
-        // Check if the panel is visible in the scene
-        console.log('Menu panel visible:', menuPanel.getAttribute('visible'));
-        console.log('Menu panel position:', menuPanel.getAttribute('position'));
-      }, 1000);
+      // Create wrist UI attached to the parent
+      const wristUI = document.createElement('a-entity');
+      wristUI.setAttribute('wrist-ui', 'hand: left');
+      uiParent.appendChild(wristUI);
+      console.log('Wrist UI attached to left hand');
     } else {
-      console.error('Scene element not found for menu panel setup');
+      console.error('Left hand element not found');
     }
   }
 });

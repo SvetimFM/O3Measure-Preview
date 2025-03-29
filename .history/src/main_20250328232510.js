@@ -28,8 +28,8 @@ document.addEventListener('DOMContentLoaded', function() {
     statusElement.textContent = 'Ready! Enter AR to begin hand tracking.';
     console.log('Scene loaded successfully');
     
-    // Set up menu panel
-    setupMenuPanel();
+    // Set up wrist UI
+    setupWristUI();
   });
   
   // AR button setup
@@ -52,42 +52,41 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('Entered AR mode');
   });
   
-  // Set up menu panel in front of the user
-  function setupMenuPanel() {
-    console.log('Setting up menu panel');
+  // Set up UI panel in front of the user
+  function setupWristUI() {
+    console.log('Setting up menu UI');
     
     const scene = document.querySelector('a-scene');
     console.log('Scene element:', scene);
     
     if (scene) {
-      // Create menu panel as a direct child of the scene
-      console.log('Creating menu panel entity');
-      const menuPanel = document.createElement('a-entity');
-      menuPanel.setAttribute('menu-panel', {
+      // Create UI as a direct child of the scene
+      console.log('Creating menu UI entity');
+      const menuUI = document.createElement('a-entity');
+      menuUI.setAttribute('wrist-ui', {
         width: 0.30,
         height: 0.20,
         color: '#333333',
         borderColor: '#db8814',
-        grabbable: true
       });
-      menuPanel.setAttribute('id', 'menuPanel');
-      console.log('Menu panel entity created');
+      menuUI.setAttribute('id', 'menuUI');
+      console.log('Menu UI entity created');
       
       // Add to scene directly
-      scene.appendChild(menuPanel);
-      console.log('Menu panel added to scene');
+      scene.appendChild(menuUI);
+      console.log('Menu UI added to scene');
       
       // Verify the component was applied
       setTimeout(() => {
-        const component = menuPanel.components['menu-panel'];
-        console.log('Menu panel component after initialization:', component);
+        const component = menuUI.components['wrist-ui'];
+        console.log('Menu UI component after initialization:', component);
         
-        // Check if the panel is visible in the scene
-        console.log('Menu panel visible:', menuPanel.getAttribute('visible'));
-        console.log('Menu panel position:', menuPanel.getAttribute('position'));
+        // Check if the UI is visible in the scene
+        console.log('Menu UI visible:', menuUI.getAttribute('visible'));
+        console.log('Menu UI position:', menuUI.getAttribute('position'));
       }, 1000);
     } else {
-      console.error('Scene element not found for menu panel setup');
+      console.error('Scene element not found for menu UI setup');
     }
   }
 });

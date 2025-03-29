@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "aframe": "^1.7.0",
+    "aframe-slice9-component": "^1.0.0",
     "express": "^4.21.2",
     "three": "^0.173.0",
     "webxr": "^0.0.0"
