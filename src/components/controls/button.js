@@ -65,10 +65,32 @@ AFRAME.registerComponent('button', {
     // Bind methods
     this.onPressedStarted = this.onPressedStarted.bind(this);
     this.onPressedEnded = this.onPressedEnded.bind(this);
+    this.onMouseEnter = this.onMouseEnter.bind(this);
+    this.onMouseLeave = this.onMouseLeave.bind(this);
     
     // Add event listeners for pressable
     this.el.addEventListener('pressedstarted', this.onPressedStarted);
     this.el.addEventListener('pressedended', this.onPressedEnded);
+    
+    // Add event listeners for hover
+    this.el.addEventListener('mouseenter', this.onMouseEnter);
+    this.el.addEventListener('mouseleave', this.onMouseLeave);
+  },
+  
+  onMouseEnter: function() {
+    // Only change color if not pressed
+    if (!this.pressed) {
+      this.buttonBackground.setAttribute('color', this.data.hoverColor);
+    }
+    console.log(`Button hover: ${this.data.label}`);
+  },
+  
+  onMouseLeave: function() {
+    // Restore original color if not pressed
+    if (!this.pressed) {
+      this.buttonBackground.setAttribute('color', this.data.color);
+    }
+    console.log(`Button hover end: ${this.data.label}`);
   },
   
   onPressedStarted: function(evt) {
@@ -142,6 +164,8 @@ AFRAME.registerComponent('button', {
     // Remove event listeners
     this.el.removeEventListener('pressedstarted', this.onPressedStarted);
     this.el.removeEventListener('pressedended', this.onPressedEnded);
+    this.el.removeEventListener('mouseenter', this.onMouseEnter);
+    this.el.removeEventListener('mouseleave', this.onMouseLeave);
     
     // Clean up elements
     if (this.buttonBackground && this.buttonBackground.parentNode) {
