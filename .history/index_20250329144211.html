@@ -30,17 +30,21 @@
     <a-scene 
       webxr="mode: immersive-ar;
              optionalFeatures: hit-test, dom-overlay, anchors; 
-             requiredFeatures: local-floor, hand-tracking; 
+             requiredFeatures: local-floor, hand-tracking, mesh-detection, plane-detection; 
              overlayElement: #overlay-ui;
              referenceSpaceType: local-floor;
              matchDeviceSize: true"
       renderer="antialias: true; colorManagement: true; precision: high; foveationLevel: 1"
       loading-screen="enabled: true; dotsColor: #15ACCF; backgroundColor: #000000"
       xr-mode-ui="enabled: true; enterAREnabled: true; XRMode: ar;"      scene-manager basic-scene
-      ar-hit-test="target: #reticle; enabled: true">
+      ar-hit-test="target: #reticle; enabled: true"
+      real-world-meshing="filterLabels: [wall]; meshMixin: wall-mesh;">
       
-      <!-- A-Frame Assets -->
-      <a-assets></a-assets>
+      <!-- Wall Mix-In-->
+      <a-assets>
+        <a-mixin id="wall-mesh" material="color: #88CCFF; opacity: 0.3; wireframe:        
+      true"></a-mixin>
+      </a-assets>
       
       <!-- Camera rig with hands -->
       <a-entity id="cameraRig" position="0 0 0">

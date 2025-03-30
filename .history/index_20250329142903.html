@@ -30,7 +30,7 @@
     <a-scene 
       webxr="mode: immersive-ar;
              optionalFeatures: hit-test, dom-overlay, anchors; 
-             requiredFeatures: local-floor, hand-tracking; 
+             requiredFeatures: local-floor, hand-tracking, mesh-detection, plane-detection; 
              overlayElement: #overlay-ui;
              referenceSpaceType: local-floor;
              matchDeviceSize: true"
@@ -38,9 +38,6 @@
       loading-screen="enabled: true; dotsColor: #15ACCF; backgroundColor: #000000"
       xr-mode-ui="enabled: true; enterAREnabled: true; XRMode: ar;"      scene-manager basic-scene
       ar-hit-test="target: #reticle; enabled: true">
-      
-      <!-- A-Frame Assets -->
-      <a-assets></a-assets>
       
       <!-- Camera rig with hands -->
       <a-entity id="cameraRig" position="0 0 0">
@@ -50,6 +47,11 @@
                   wasd-controls="enabled: false">
         </a-camera>
       </a-entity>
+
+      <!-- Wall Detection -->
+      <a-scene real-world-meshing
+      filterLabels="WALL_FACE"></a-scene>
+
       
       <!-- Basic lighting -->
       <a-entity light="type: ambient; intensity: 0.8"></a-entity>
@@ -82,7 +84,6 @@
                   animation="property: position; to: 0.2 0.1 0; from: 0.2 0 0; dir: alternate; loop: true; dur: 2000; easing: easeInOutSine" ></a-sphere>
       </a-entity>
     </a-scene>
-
     <!-- Script entry point -->
     <script type="module" src="/src/main.js"></script>
   </body>
