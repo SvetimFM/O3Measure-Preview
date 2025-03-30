@@ -77,6 +77,31 @@ document.addEventListener('DOMContentLoaded', function() {
       scene.appendChild(menuPanel);
       console.log('Menu panel added to scene');
       
+      // Create wall calibration menu (initially hidden)
+      console.log('Creating wall calibration menu');
+      const wallCalibrationMenu = document.createElement('a-entity');
+      wallCalibrationMenu.setAttribute('wall-calibration-menu', {
+        width: 0.30,
+        height: 0.25,
+        color: '#333333',
+        borderColor: '#db8814',
+        active: false,  // Start hidden
+        grabbable: true
+      });
+      wallCalibrationMenu.setAttribute('id', 'wallCalibrationMenu');
+      
+      // Add wall calibration menu to scene
+      scene.appendChild(wallCalibrationMenu);
+      console.log('Wall calibration menu added to scene');
+      
+      // Listen for when the wall calibration menu is closed
+      scene.addEventListener('wall-calibration-closed', function() {
+        console.log('Wall calibration menu closed event received');
+        if (menuPanel.components['menu-panel']) {
+          menuPanel.components['menu-panel'].show();
+        }
+      });
+      
       // Verify the component was applied
       setTimeout(() => {
         const component = menuPanel.components['menu-panel'];

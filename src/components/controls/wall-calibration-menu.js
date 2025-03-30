@@ -1,42 +1,39 @@
 /**
- * Menu Panel Component
+ * Wall Calibration Menu Component
  * 
- * Creates a menu panel positioned in front of the user with a grabbable backing
- * All UI elements are attached to the backing to move together when grabbed
- * Used for menu and interaction purposes in AR/VR
+ * Creates a specialized menu for wall calibration functions
+ * Appears when the Wall Calibration button is pressed in the main menu
+ * Provides wall-specific calibration options and a back button to return to main menu
  */
 
-AFRAME.registerComponent('menu-panel', {
+AFRAME.registerComponent('wall-calibration-menu', {
   schema: {
     width: { type: 'number', default: 0.30 },
-    height: { type: 'number', default: 0.20 },
+    height: { type: 'number', default: 0.25 },
     color: { type: 'color', default: '#333333' },
     borderWidth: { type: 'number', default: 0.003 },
     borderColor: { type: 'color', default: '#db8814' },
-    active: { type: 'boolean', default: true },
+    active: { type: 'boolean', default: false },
     grabbable: { type: 'boolean', default: true }
   },
 
   init: function() {
-    console.log('Menu Panel Component: Initializing');
+    console.log('Wall Calibration Menu: Initializing');
     
     // Create the panel
-    console.log('Menu Panel: Creating panel');
     this.createPanel();
     
     // Create menu content
-    console.log('Menu Panel: Creating menu content');
     this.createMenuContent();
     
     // Set visibility based on active state
     this.el.setAttribute('visible', this.data.active);
-    console.log('Menu Panel: Visibility set to', this.data.active);
     
     // Position the panel in front of the user
     this.positionInFrontOfUser();
     
-    // Log the component's element
-    console.log('Menu Panel: Component element', this.el);
+    // Listen for menu action events
+    this.el.sceneEl.addEventListener('menu-action', this.onMenuAction.bind(this));
   },
   
   createPanel: function() {
@@ -56,8 +53,6 @@ AFRAME.registerComponent('menu-panel', {
       });
       this.container.setAttribute('class', 'grabbable');
       this.container.setAttribute('grabbable', '');
-      
-      console.log('Menu Panel: Created grabbable container');
     } else {
       // Create regular container
       this.container = document.createElement('a-entity');
@@ -92,7 +87,7 @@ AFRAME.registerComponent('menu-panel', {
   createMenuContent: function() {
     // Add title
     const title = document.createElement('a-text');
-    title.setAttribute('value', 'O3Measure');
+    title.setAttribute('value', 'Wall Calibration');
     title.setAttribute('align', 'center');
     title.setAttribute('position', `0 ${this.data.height/2 - 0.015} 0.004`);
     title.setAttribute('color', '#FFFFFF');
@@ -101,7 +96,7 @@ AFRAME.registerComponent('menu-panel', {
     
     // Add subtitle
     const subtitle = document.createElement('a-text');
-    subtitle.setAttribute('value', 'Menu');
+    subtitle.setAttribute('value', 'Configure Wall Settings');
     subtitle.setAttribute('align', 'center');
     subtitle.setAttribute('position', `0 ${this.data.height/2 - 0.035} 0.004`);
     subtitle.setAttribute('color', '#AAAAAA');
@@ -122,85 +117,121 @@ AFRAME.registerComponent('menu-panel', {
     divider.setAttribute('position', `0 ${this.data.height/2 - 0.05} 0.004`);
     this.container.appendChild(divider);
     
-    // Create column of menu buttons
-    this.createMenuButtons();
+    // Create calibration controls
+    this.createCalibrationControls();
+    
+    // Create back button
+    this.createBackButton();
   },
   
-  createMenuButtons: function() {
+  createCalibrationControls: function() {
     // Calculate starting Y position based on panel height
-    const startY = this.data.height/2 - 0.07; 
-    const spacing = 0.0275;
+    const startY = this.data.height/2 - 0.07;
+    const spacing = 0.035;
     
-    // Button config - defines labels, colors and positions
+    // Instructional text
+    const instructionText = document.createElement('a-text');
+    instructionText.setAttribute('value', 'Select a wall to calibrate');
+    instructionText.setAttribute('align', 'center');
+    instructionText.setAttribute('position', `0 ${startY} 0.004`);
+    instructionText.setAttribute('color', '#FFFFFF');
+    instructionText.setAttribute('scale', '0.025 0.025 0.025');
+    this.container.appendChild(instructionText);
+    
+    // Button config - defines calibration options
     const buttons = [
-      { label: 'Placeholder', color: '#4285F4', position: `0 ${startY} 0.004` },
-      { label: 'Placeholder_1', color: '#0F9D58', position: `0 ${startY - spacing} 0.004` },
-      { label: 'Placeholder_2', color: '#DB4437', position: `0 ${startY - spacing*2} 0.004` },
-      { label: 'Wall Calibration', color: '#F4B400', position: `0 ${startY - spacing*3} 0.004` }
+      { 
+        label: 'Start Wall Scan', 
+        color: '#4285F4', 
+        position: `0 ${startY - spacing} 0.004`,
+        width: 0.2,
+        height: 0.03
+      },
+      { 
+        label: 'Set Wall Height', 
+        color: '#0F9D58', 
+        position: `0 ${startY - spacing*2} 0.004`,
+        width: 0.2,
+        height: 0.03
+      }
     ];
     
-    // Create all buttons in a column
-    buttons.forEach((config) => {
-      const button = document.createElement('a-entity');
-      button.setAttribute('button', {
-        label: config.label,
-        width: 0.14,
-        height: 0.025,
-        color: config.color,
-        textColor: '#FFFFFF'
-      });
-      button.setAttribute('position', config.position);
-      
-      // Add event listener for button press
-      button.addEventListener('button-press-ended', (event) => {
-        console.log('Menu button pressed:', event.detail.label);
-        this.handleButtonPress(event.detail.label);
-      });
-      
-      // Store reference to the button
-      button.id = `button-${config.label.toLowerCase().replace(/\s+/g, '-')}`;
-      this.container.appendChild(button);
+    // Create calibration buttons
+    buttons.forEach(config => {
+      this.createButton(config);
+    });
+  },
+  
+  createButton: function(config) {
+    const button = document.createElement('a-entity');
+    button.setAttribute('button', {
+      label: config.label,
+      width: config.width || 0.14,
+      height: config.height || 0.025,
+      color: config.color,
+      textColor: '#FFFFFF'
+    });
+    button.setAttribute('position', config.position);
+    
+    // Add event listener for button press
+    button.addEventListener('button-press-ended', (event) => {
+      console.log('Wall Calibration button pressed:', event.detail.label);
+      this.handleButtonPress(event.detail.label);
+    });
+    
+    // Store reference to the button
+    button.id = `button-${config.label.toLowerCase().replace(/\s+/g, '-')}`;
+    this.container.appendChild(button);
+    
+    return button;
+  },
+  
+  createBackButton: function() {
+    // Back button at the bottom of the menu
+    const backButton = this.createButton({
+      label: 'Back to Main Menu',
+      color: '#DB4437',
+      position: `0 ${-this.data.height/2 + 0.025} 0.004`,
+      width: 0.2,
+      height: 0.03
     });
   },
   
   positionInFrontOfUser: function() {
     // Position the UI in front of the user at eye level
     // Default camera is at 0, 1.6, 0 looking down -Z axis
-    this.el.setAttribute('position', '0 1.0 -0.5');
+    this.el.setAttribute('position', '0 1.1 -0.5');
     
     // Slight downward tilt for better visibility
     this.el.setAttribute('rotation', '-15 0 0');
-    
-    console.log('Menu Panel: Positioned in front of user');
   },
   
   handleButtonPress: function(buttonLabel) {
     // Emit global event with button action
-    this.el.sceneEl.emit('menu-action', {
+    this.el.sceneEl.emit('wall-calibration-action', {
       action: buttonLabel.toLowerCase().replace(/\s+/g, '-')
     });
     
     // Add specific functionality based on button pressed
     switch(buttonLabel) {
-      case 'Placeholder':
-        console.log('Placeholder function');
+      case 'Start Wall Scan':
+        console.log('Starting wall scan process');
         break;
-      case 'Placeholder_1':
-        console.log('Placeholder_1 function');
+      case 'Set Wall Height':
+        console.log('Setting wall height');
         break;
-      case 'Placeholder_2':
-        console.log('Placeholder_2 function');
-        break;
-      case 'Wall Calibration':
-        console.log('Opening Wall Calibration Interface');
-        // Hide this menu when opening the wall calibration menu
+      case 'Back to Main Menu':
+        console.log('Returning to main menu');
         this.hide();
         
-        // Emit event for wall calibration menu to handle
-        this.el.sceneEl.emit('menu-action', {
-          action: 'wall-calibration',
-          menuId: this.el.id
-        });
+        // Emit event to notify that wall calibration menu is closed
+        this.el.sceneEl.emit('wall-calibration-closed');
+        
+        // Find and show the main menu
+        const mainMenu = document.getElementById('menuPanel');
+        if (mainMenu && mainMenu.components['menu-panel']) {
+          mainMenu.components['menu-panel'].el.setAttribute('visible', true);
+        }
         break;
     }
   },
@@ -213,6 +244,21 @@ AFRAME.registerComponent('menu-panel', {
   hide: function() {
     this.data.active = false;
     this.el.setAttribute('visible', false);
+  },
+  
+  onMenuAction: function(event) {
+    const detail = event.detail;
+    
+    // Check if this event is for wall calibration
+    if (detail.action === 'wall-calibration') {
+      console.log('Wall calibration menu received show signal');
+      this.show();
+      
+      // Store reference to the source menu if provided
+      if (detail.menuId) {
+        this.sourceMenuId = detail.menuId;
+      }
+    }
   },
   
   update: function(oldData) {
@@ -265,6 +311,9 @@ AFRAME.registerComponent('menu-panel', {
   },
   
   remove: function() {
+    // Remove event listener
+    this.el.sceneEl.removeEventListener('menu-action', this.onMenuAction);
+    
     // Just remove the container - this will handle all children
     if (this.container && this.container.parentNode) {
       this.container.parentNode.removeChild(this.container);
