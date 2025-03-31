@@ -54,65 +54,40 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Set up menu panel in front of the user
   function setupMenuPanel() {
-    console.log('Setting up menu panel');
+    console.log('Setting up menu manager');
     
     const scene = document.querySelector('a-scene');
     console.log('Scene element:', scene);
     
     if (scene) {
-      // Create menu panel as a direct child of the scene
-      console.log('Creating menu panel entity');
-      const menuPanel = document.createElement('a-entity');
-      menuPanel.setAttribute('menu-panel', {
-        width: 0.15,    // Half the original width (0.30 * 0.5)
-        height: 0.192,  // Half the original height (0.384 * 0.5)
+      // Create a single menu manager as a direct child of the scene
+      console.log('Creating menu manager entity');
+      const menuManager = document.createElement('a-entity');
+      menuManager.setAttribute('menu-manager', {
+        width: 0.30,
+        height: 0.20,
         color: '#333333',
         borderColor: '#db8814',
         grabbable: true
       });
-      menuPanel.setAttribute('id', 'menuPanel');
-      console.log('Menu panel entity created');
+      menuManager.setAttribute('id', 'menuManager');
+      console.log('Menu manager entity created');
       
       // Add to scene directly
-      scene.appendChild(menuPanel);
-      console.log('Menu panel added to scene');
-      
-      // Create wall calibration menu (initially hidden)
-      console.log('Creating wall calibration menu');
-      const wallCalibrationMenu = document.createElement('a-entity');
-      wallCalibrationMenu.setAttribute('wall-calibration-menu', {
-        width: 0.30,
-        height: 0.25,
-        color: '#333333',
-        borderColor: '#db8814',
-        active: false,  // Start hidden
-        grabbable: true
-      });
-      wallCalibrationMenu.setAttribute('id', 'wallCalibrationMenu');
-      
-      // Add wall calibration menu to scene
-      scene.appendChild(wallCalibrationMenu);
-      console.log('Wall calibration menu added to scene');
-      
-      // Listen for when the wall calibration menu is closed
-      scene.addEventListener('wall-calibration-closed', function() {
-        console.log('Wall calibration menu closed event received');
-        if (menuPanel.components['menu-panel']) {
-          menuPanel.components['menu-panel'].show();
-        }
-      });
+      scene.appendChild(menuManager);
+      console.log('Menu manager added to scene');
       
       // Verify the component was applied
       setTimeout(() => {
-        const component = menuPanel.components['menu-panel'];
-        console.log('Menu panel component after initialization:', component);
+        const component = menuManager.components['menu-manager'];
+        console.log('Menu manager component after initialization:', component);
         
         // Check if the panel is visible in the scene
-        console.log('Menu panel visible:', menuPanel.getAttribute('visible'));
-        console.log('Menu panel position:', menuPanel.getAttribute('position'));
+        console.log('Menu manager visible:', menuManager.getAttribute('visible'));
+        console.log('Menu manager position:', menuManager.getAttribute('position'));
       }, 1000);
     } else {
-      console.error('Scene element not found for menu panel setup');
+      console.error('Scene element not found for menu manager setup');
     }
   }
 });
