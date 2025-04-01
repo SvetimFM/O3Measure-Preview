@@ -53,8 +53,8 @@
       <a-entity light="type: directional; intensity: 0.6" position="1 1 1"></a-entity>
                
       <!-- Hand tracking with grab controls -->
-      <a-entity id="leftHand" hand-tracking-grab-controls="hand: left;" obb-collider></a-entity>
-      <a-entity id="rightHand" hand-tracking-grab-controls="hand: right;" obb-collider></a-entity>
+      <a-entity id="leftHand" hand-tracking-grab-controls="hand: left;"></a-entity>
+      <a-entity id="rightHand" hand-tracking-grab-controls="hand: right;"></a-entity>
 
       <!-- Hand tracking for visualization -->
       <a-entity id="leftHand" hand-tracking-controls="hand: left;"></a-entity>
@@ -68,7 +68,7 @@
           width="0.1" height="0.1" depth="0.1" 
           color="#FF7700"
           shadow="cast: true"
-          animation="property: rotation; to: 0 360 0; loop: true; dur: 10000; easing: linear" grabbable obb-collider>
+          animation="property: rotation; to: 0 360 0; loop: true; dur: 10000; easing: linear" grabbable>
         </a-box>
     </a-scene>
 

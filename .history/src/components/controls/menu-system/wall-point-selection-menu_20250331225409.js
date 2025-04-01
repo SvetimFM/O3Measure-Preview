@@ -270,7 +270,7 @@ WallPointSelectionMenu.finalizeCalibration = function() {
     label: 'Done',
     width: 0.08,
     height: 0.04,
-    color: '#42D544' // Active green color
+    color: '#42F544' // Active blue color
   });
   
   // Get scene state system

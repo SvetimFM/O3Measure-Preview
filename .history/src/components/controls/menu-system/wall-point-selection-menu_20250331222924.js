@@ -59,10 +59,10 @@ WallPointSelectionMenu.render = function() {
   // Add start button
   const startButton = this.createButton({
     label: 'Start',
-    width: 0.07,
+    width: 0.06,
     height: 0.04,
     color: '#4285F4',
-    position: '-0.06 -0.06 0',
+    position: '-0.07 -0.08 0',
     id: 'calibration-start-button',
     handler: () => this.handleStartButton()
   });
@@ -71,10 +71,10 @@ WallPointSelectionMenu.render = function() {
   // Add cancel button
   const cancelButton = this.createButton({
     label: 'Cancel',
-    width: 0.07,
+    width: 0.06,
     height: 0.04,
     color: '#DB4437',
-    position: '0.06 -0.06 0',
+    position: '0.07 -0.08 0',
     handler: () => this.handleCancelButton()
   });
   this.container.appendChild(cancelButton);
@@ -107,6 +107,8 @@ WallPointSelectionMenu.handleStartButton = function() {
   // Grey out start button
   startButton.setAttribute('button', {
     label: 'Started',
+    width: 0.12,
+    height: 0.04,
     color: '#888888' // Grey color
   });
   
@@ -209,7 +211,7 @@ WallPointSelectionMenu.createMarker = function(position, index) {
   
   // Create label
   const label = document.createElement('a-text');
-  label.setAttribute('value', `${index}`);
+  label.setAttribute('value', `Point ${index}`);
   label.setAttribute('align', 'center');
   label.setAttribute('position', '0 0.05 0');
   label.setAttribute('scale', '0.1 0.1 0.1');
@@ -268,9 +270,9 @@ WallPointSelectionMenu.finalizeCalibration = function() {
   const startButton = document.getElementById('calibration-start-button');
   startButton.setAttribute('button', {
     label: 'Done',
-    width: 0.08,
+    width: 0.12,
     height: 0.04,
-    color: '#42D544' // Active green color
+    color: '#4285F4' // Active blue color
   });
   
   // Get scene state system

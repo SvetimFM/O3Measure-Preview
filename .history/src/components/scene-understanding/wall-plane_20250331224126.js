@@ -44,7 +44,6 @@ AFRAME.registerComponent('wall-plane', {
     this.plane.setAttribute('height', this.data.height);
     this.plane.setAttribute('color', this.data.color);
     this.plane.setAttribute('opacity', 0); // Invisible
-    this.plane.setAttribute('visible', false); // Not rendered at all
     this.plane.setAttribute('side', 'double');
     this.plane.setAttribute('class', 'wall-plane');
     
@@ -63,9 +62,9 @@ AFRAME.registerComponent('wall-plane', {
   
   createGridPattern: function() {
     // Add grid lines as child entities
-    const gridSpacing = 0.2; // 10cm grid
-    const gridWidth = 4; 
-    const gridHeight = 2.5; // 2.5 meter grid
+    const gridSpacing = 0.2; // 20cm grid
+    const gridWidth = 8; // 8 meter grid
+    const gridHeight = 8; // 8 meter grid
     const gridColor = '#FF8800'; // Bright orange
     
     // Create horizontal and vertical lines

@@ -42,8 +42,8 @@ WallAdjustmentMenu.createAdjustmentControls = function() {
   
   // Create Move Closer button
   const closerButton = this.createButton({
-    label: 'Move -Z',
-    width: 0.04,
+    label: 'Move Closer',
+    width: 0.14,
     height: 0.04,
     color: '#4285F4',
     position: `0 ${startY} 0`,
@@ -53,8 +53,8 @@ WallAdjustmentMenu.createAdjustmentControls = function() {
   
   // Create Move Farther button
   const fartherButton = this.createButton({
-    label: 'Move +Z',
-    width: 0.04,
+    label: 'Move Farther',
+    width: 0.14,
     height: 0.04,
     color: '#0F9D58',
     position: `0 ${startY - 0.05} 0`,

@@ -44,7 +44,6 @@ AFRAME.registerComponent('wall-plane', {
     this.plane.setAttribute('height', this.data.height);
     this.plane.setAttribute('color', this.data.color);
     this.plane.setAttribute('opacity', 0); // Invisible
-    this.plane.setAttribute('visible', false); // Not rendered at all
     this.plane.setAttribute('side', 'double');
     this.plane.setAttribute('class', 'wall-plane');
     

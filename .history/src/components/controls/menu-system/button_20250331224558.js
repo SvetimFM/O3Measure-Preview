@@ -49,7 +49,7 @@ AFRAME.registerComponent('button', {
     this.buttonText.setAttribute('color', data.textColor);
     this.buttonText.setAttribute('align', 'center');
     this.buttonText.setAttribute('position', '0 0 0.001');
-    this.buttonText.setAttribute('width', data.height * 60); // Scale text appropriately
+    this.buttonText.setAttribute('width', (data.width+data.height)/2 * 50); // Scale text appropriately
     this.buttonText.setAttribute('wrap-count', 20);
     this.buttonText.setAttribute('scale', '0.07 0.07 0.07'); // Enlarged text
     

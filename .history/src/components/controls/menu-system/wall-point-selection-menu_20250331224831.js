@@ -268,9 +268,9 @@ WallPointSelectionMenu.finalizeCalibration = function() {
   const startButton = document.getElementById('calibration-start-button');
   startButton.setAttribute('button', {
     label: 'Done',
-    width: 0.08,
+    width: 0.12,
     height: 0.04,
-    color: '#42D544' // Active green color
+    color: '#4285F4' // Active blue color
   });
   
   // Get scene state system

@@ -8,7 +8,7 @@
 AFRAME.registerComponent('button', {
   schema: {
     label: {type: 'string', default: 'Button'},
-    width: {type: 'number', default: 0.04},
+    width: {type: 'number', default: 0.05},
     height: {type: 'number', default: 0.02},
     color: {type: 'color', default: '#4285F4'},
     hoverColor: {type: 'color', default: '#5794F7'},
@@ -49,7 +49,7 @@ AFRAME.registerComponent('button', {
     this.buttonText.setAttribute('color', data.textColor);
     this.buttonText.setAttribute('align', 'center');
     this.buttonText.setAttribute('position', '0 0 0.001');
-    this.buttonText.setAttribute('width', data.height * 60); // Scale text appropriately
+    this.buttonText.setAttribute('width', data.width * 10); // Scale text appropriately
     this.buttonText.setAttribute('wrap-count', 20);
     this.buttonText.setAttribute('scale', '0.07 0.07 0.07'); // Enlarged text
     
