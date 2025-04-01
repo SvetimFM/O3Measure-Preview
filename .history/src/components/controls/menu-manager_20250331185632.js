@@ -11,7 +11,7 @@ import { MenuRegistry } from './menu-system/index.js';
 AFRAME.registerComponent('menu-manager', {
   schema: {
     width: { type: 'number', default: 0.1 },
-    height: { type: 'number', default: 0.3 },
+    height: { type: 'number', default: 0.25 },
     color: { type: 'color', default: '#333333' },
     borderWidth: { type: 'number', default: 0.003 },
     borderColor: { type: 'color', default: '#db8814' },

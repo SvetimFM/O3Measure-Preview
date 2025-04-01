@@ -4,9 +4,8 @@
  */
 
 // Control Components
-import './controls/button.js';
-import './controls/pressable.js';
 import './controls/menu-manager.js';
+import './controls/menu-system/index.js';
 
 // Scene Understanding Components
 import './scene-understanding/wall-plane.js';

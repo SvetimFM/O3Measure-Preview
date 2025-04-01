@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', function() {
       console.log('Creating menu manager entity');
       const menuManager = document.createElement('a-entity');
       menuManager.setAttribute('menu-manager', {
-        width: 0.30,
+        width: 0.25,
         height: 0.20,
         color: '#333333',
         borderColor: '#db8814',
