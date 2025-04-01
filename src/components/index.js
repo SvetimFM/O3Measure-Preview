@@ -8,5 +8,8 @@ import './controls/button.js';
 import './controls/pressable.js';
 import './controls/menu-manager.js';
 
+// Scene Understanding Components
+import './scene-understanding/wall-plane.js';
+
 // Initialize all components
 console.log('O3Measure components initialized');

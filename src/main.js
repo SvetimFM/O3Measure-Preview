@@ -7,6 +7,9 @@
 import './scenes/basic-scene.js';
 import './scenes/scene-manager.js';
 
+// Import state management
+import './state/scene-state.js';
+
 // Import custom components
 import './components/index.js';
 
@@ -76,6 +79,21 @@ document.addEventListener('DOMContentLoaded', function() {
       // Add to scene directly
       scene.appendChild(menuManager);
       console.log('Menu manager added to scene');
+      
+      // Create wall plane entity
+      console.log('Creating wall plane entity');
+      const wallPlane = document.createElement('a-entity');
+      wallPlane.setAttribute('wall-plane', {
+        visible: false // Initially hidden
+      });
+      wallPlane.setAttribute('id', 'wallPlane');
+      
+      // Add wall plane to scene
+      scene.appendChild(wallPlane);
+      console.log('Wall plane added to scene');
+      
+      // We've integrated calibration into the menu manager
+      console.log('Calibration functionality is now integrated into the menu manager');
       
       // Verify the component was applied
       setTimeout(() => {
