@@ -6,6 +6,7 @@
  */
 
 import MenuRegistry from './menu-registry.js';
+import { EVENTS, emitEvent } from '../../../utils/events.js';
 
 // Base menu component
 const BaseMenu = {
@@ -160,7 +161,7 @@ const BaseMenu = {
     }
     
     if (config.handler) {
-      this.addEventListener(button, 'button-press-ended', config.handler);
+      this.addEventListener(button, EVENTS.BUTTON.PRESS_ENDED, config.handler);
     }
     
     return button;
@@ -173,7 +174,7 @@ const BaseMenu = {
    */
   emitMenuAction: function(action, detail = {}) {
     detail.action = action;
-    this.sceneEl.emit('menu-action', detail);
+    emitEvent(this.sceneEl, EVENTS.MENU.ACTION, detail);
   }
 };
 

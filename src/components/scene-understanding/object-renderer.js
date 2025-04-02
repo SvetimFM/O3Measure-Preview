@@ -4,6 +4,8 @@
  * Renders saved objects on the wall plane using provided dimensions and coordinates
  */
 
+import { EVENTS } from '../../utils/events.js';
+
 AFRAME.registerComponent('object-renderer', {
   schema: {
     active: { type: 'boolean', default: true },
@@ -40,11 +42,11 @@ AFRAME.registerComponent('object-renderer', {
   
   setupEventListeners: function() {
     // Listen for object-related events
-    this.el.sceneEl.addEventListener('object-created', this.onObjectCreated);
+    this.el.sceneEl.addEventListener(EVENTS.OBJECT.CREATED, this.onObjectCreated);
     
     // Listen for state changes
     if (this.sceneState) {
-      this.el.sceneEl.addEventListener('scene-state-changed', this.onStateChanged);
+      this.el.sceneEl.addEventListener(EVENTS.STATE.CHANGED, this.onStateChanged);
     }
   },
   
@@ -280,9 +282,9 @@ AFRAME.registerComponent('object-renderer', {
   
   remove: function() {
     // Clean up event listeners
-    this.el.sceneEl.removeEventListener('object-created', this.onObjectCreated);
+    this.el.sceneEl.removeEventListener(EVENTS.OBJECT.CREATED, this.onObjectCreated);
     if (this.sceneState) {
-      this.el.sceneEl.removeEventListener('scene-state-changed', this.onStateChanged);
+      this.el.sceneEl.removeEventListener(EVENTS.STATE.CHANGED, this.onStateChanged);
     }
     
     // Remove all rendered objects

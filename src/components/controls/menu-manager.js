@@ -7,6 +7,7 @@
  */
 
 import { MenuRegistry } from './menu-system/index.js';
+import { EVENTS } from '../../utils/events.js';
 
 AFRAME.registerComponent('menu-manager', {
   schema: {
@@ -106,7 +107,7 @@ AFRAME.registerComponent('menu-manager', {
     this.onSelectStart = this.onSelectStart.bind(this);
     
     // Listen for menu action events
-    this.el.sceneEl.addEventListener('menu-action', this.onMenuAction);
+    this.el.sceneEl.addEventListener(EVENTS.MENU.ACTION, this.onMenuAction);
     
     // Listen for system menu gesture (selectstart event)
     this.el.sceneEl.addEventListener('selectstart', this.onSelectStart);
@@ -313,7 +314,7 @@ AFRAME.registerComponent('menu-manager', {
     this.clearMenu();
     
     // Remove event listeners
-    this.el.sceneEl.removeEventListener('menu-action', this.onMenuAction);
+    this.el.sceneEl.removeEventListener(EVENTS.MENU.ACTION, this.onMenuAction);
     this.el.sceneEl.removeEventListener('selectstart', this.onSelectStart);
     
     // Just remove the container - this will handle all children

@@ -5,6 +5,8 @@
  * Works with hand-tracking-controls
  * Uses THREE.Box3 for width-aware detection across button's entire surface
  */
+
+import { EVENTS } from '../../../utils/events.js';
 AFRAME.registerComponent('pressable', {
   schema: {
     pressDistance: { default: 0.008 },  // Z-distance for press detection
@@ -93,12 +95,12 @@ AFRAME.registerComponent('pressable', {
     // Handle press state
     if (minDistance < this.data.pressDistance) {
       if (!this.pressed) { 
-        this.el.emit('pressedstarted');
+        this.el.emit(EVENTS.INTERACTION.PRESSED_STARTED);
         console.log('Button press started');
       }
       this.pressed = true;
     } else if (this.pressed) {
-      this.el.emit('pressedended'); 
+      this.el.emit(EVENTS.INTERACTION.PRESSED_ENDED); 
       console.log('Button press ended');
       this.pressed = false;
     }

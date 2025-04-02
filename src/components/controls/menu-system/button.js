@@ -5,6 +5,8 @@
  * Following A-Frame's hand tracking examples
  */
 
+import { EVENTS } from '../../../utils/events.js';
+
 AFRAME.registerComponent('button', {
   schema: {
     label: {type: 'string', default: 'Button'},
@@ -69,8 +71,8 @@ AFRAME.registerComponent('button', {
     this.onMouseLeave = this.onMouseLeave.bind(this);
     
     // Add event listeners for pressable
-    this.el.addEventListener('pressedstarted', this.onPressedStarted);
-    this.el.addEventListener('pressedended', this.onPressedEnded);
+    this.el.addEventListener(EVENTS.INTERACTION.PRESSED_STARTED, this.onPressedStarted);
+    this.el.addEventListener(EVENTS.INTERACTION.PRESSED_ENDED, this.onPressedEnded);
     
     // Add event listeners for hover
     this.el.addEventListener('mouseenter', this.onMouseEnter);
@@ -99,7 +101,7 @@ AFRAME.registerComponent('button', {
     this.updateButtonState();
     
     // Emit event for audio feedback
-    this.el.emit('button-press-started', {id: this.el.id, label: this.data.label});
+    this.el.emit(EVENTS.BUTTON.PRESS_STARTED, {id: this.el.id, label: this.data.label});
   },
   
   onPressedEnded: function(evt) {
@@ -113,7 +115,7 @@ AFRAME.registerComponent('button', {
     this.updateButtonState();
     
     // Emit click event for other components to listen to
-    this.el.emit('button-press-ended', {
+    this.el.emit(EVENTS.BUTTON.PRESS_ENDED, {
       id: this.el.id, 
       label: this.data.label,
       toggled: this.toggled
@@ -162,8 +164,8 @@ AFRAME.registerComponent('button', {
   
   remove: function() {
     // Remove event listeners
-    this.el.removeEventListener('pressedstarted', this.onPressedStarted);
-    this.el.removeEventListener('pressedended', this.onPressedEnded);
+    this.el.removeEventListener(EVENTS.INTERACTION.PRESSED_STARTED, this.onPressedStarted);
+    this.el.removeEventListener(EVENTS.INTERACTION.PRESSED_ENDED, this.onPressedEnded);
     this.el.removeEventListener('mouseenter', this.onMouseEnter);
     this.el.removeEventListener('mouseleave', this.onMouseLeave);
     

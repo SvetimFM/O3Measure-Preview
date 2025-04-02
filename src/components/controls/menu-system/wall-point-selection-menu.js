@@ -6,6 +6,7 @@
 
 import BaseMenu from './base-menu.js';
 import MenuRegistry from './menu-registry.js';
+import { EVENTS, emitEvent } from '../../../utils/events.js';
 
 // Wall point selection menu implementation
 const WallPointSelectionMenu = Object.create(BaseMenu);
@@ -25,7 +26,7 @@ WallPointSelectionMenu.init = function(container, data, sceneEl) {
   this.onPinchStarted = this.onPinchStarted.bind(this);
   
   // Set up pinch event listener
-  this.sceneEl.addEventListener('pinchstarted', this.onPinchStarted);
+  this.sceneEl.addEventListener(EVENTS.INTERACTION.PINCH_STARTED, this.onPinchStarted);
 };
 
 // Override render method with wall point selection menu content
@@ -91,7 +92,7 @@ WallPointSelectionMenu.handleStartButton = function() {
     
     // Clean up
     this.removeMarkers();
-    this.sceneEl.removeEventListener('pinchstarted', this.onPinchStarted);
+    this.sceneEl.removeEventListener(EVENTS.INTERACTION.PINCH_STARTED, this.onPinchStarted);
     
     // Return to wall calibration menu
     this.emitMenuAction('back-to-previous-menu');
@@ -119,7 +120,7 @@ WallPointSelectionMenu.handleCancelButton = function() {
   
   // Clean up
   this.removeMarkers();
-  this.sceneEl.removeEventListener('pinchstarted', this.onPinchStarted);
+  this.sceneEl.removeEventListener(EVENTS.INTERACTION.PINCH_STARTED, this.onPinchStarted);
   
   // Return to wall calibration menu
   this.emitMenuAction('back-to-previous-menu');
@@ -311,6 +312,18 @@ WallPointSelectionMenu.finalizeCalibration = function() {
       width: width,
       height: height
     });
+    
+    // Emit calibration complete event
+    emitEvent(this.sceneEl, EVENTS.WALL.CALIBRATION_COMPLETE, {
+      position: center,
+      rotation: {
+        x: THREE.MathUtils.radToDeg(plane.rotation.x),
+        y: THREE.MathUtils.radToDeg(plane.rotation.y),
+        z: THREE.MathUtils.radToDeg(plane.rotation.z)
+      },
+      width: width,
+      height: height
+    });
   }
   
   // Reset step to indicate completion
@@ -352,7 +365,7 @@ WallPointSelectionMenu.cleanup = function() {
   BaseMenu.cleanup.call(this);
   
   // Remove pinch event listener
-  this.sceneEl.removeEventListener('pinchstarted', this.onPinchStarted);
+  this.sceneEl.removeEventListener(EVENTS.INTERACTION.PINCH_STARTED, this.onPinchStarted);
   
   // Remove all markers
   this.removeMarkers();

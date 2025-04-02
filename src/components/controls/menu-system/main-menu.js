@@ -6,6 +6,7 @@
 
 import BaseMenu from './base-menu.js';
 import MenuRegistry from './menu-registry.js';
+import { EVENTS, emitEvent } from '../../../utils/events.js';
 
 // Main menu implementation
 const MainMenu = Object.create(BaseMenu);

@@ -6,6 +6,7 @@
 
 import BaseMenu from './base-menu.js';
 import MenuRegistry from './menu-registry.js';
+import { EVENTS, emitEvent } from '../../../utils/events.js';
 
 // Wall adjustment menu implementation
 const WallAdjustmentMenu = Object.create(BaseMenu);
@@ -83,8 +84,8 @@ WallAdjustmentMenu.createBackButton = function() {
 WallAdjustmentMenu.handleMoveCloser = function() {
   console.log('Wall Adjustment: Moving wall closer');
   
-  // Emit wall calibration action
-  this.sceneEl.emit('wall-calibration-action', {
+  // Emit wall calibration action using standardized event
+  emitEvent(this.sceneEl, EVENTS.WALL.ADJUST_START, {
     action: 'move-wall-closer'
   });
 };
@@ -93,8 +94,8 @@ WallAdjustmentMenu.handleMoveCloser = function() {
 WallAdjustmentMenu.handleMoveFarther = function() {
   console.log('Wall Adjustment: Moving wall farther');
   
-  // Emit wall calibration action
-  this.sceneEl.emit('wall-calibration-action', {
+  // Emit wall calibration action using standardized event
+  emitEvent(this.sceneEl, EVENTS.WALL.ADJUST_START, {
     action: 'move-wall-farther'
   });
 };

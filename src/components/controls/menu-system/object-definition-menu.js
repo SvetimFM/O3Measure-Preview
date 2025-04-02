@@ -6,6 +6,7 @@
 
 import BaseMenu from './base-menu.js';
 import MenuRegistry from './menu-registry.js';
+import { EVENTS, emitEvent } from '../../../utils/events.js';
 
 // Object definition menu implementation
 const ObjectDefinitionMenu = Object.create(BaseMenu);
@@ -32,8 +33,8 @@ ObjectDefinitionMenu.render = function() {
   this.container.appendChild(title);
   
   // Add subtitle
-  const subtitle = this.createSubtitle('Define Object on Wall', height);
-  this.container.appendChild(subtitle);
+  // const subtitle = this.createSubtitle('Define Object on Wall', height);
+  // this.container.appendChild(subtitle);
   
   // Add divider
   const divider = this.createDivider(width, height, borderColor);
@@ -43,7 +44,7 @@ ObjectDefinitionMenu.render = function() {
   const instructions = this.createElement('a-text');
   instructions.setAttribute('value', 'Define an object by placing three corner points');
   instructions.setAttribute('align', 'center');
-  instructions.setAttribute('position', `0 ${height/2 - 0.05} 0`);
+  instructions.setAttribute('position', `0 ${height/2 - 0.04} 0`);
   instructions.setAttribute('color', '#FFFFFF');
   instructions.setAttribute('scale', '0.03 0.03 0.03');
   instructions.setAttribute('id', 'object-instructions');
@@ -86,7 +87,7 @@ ObjectDefinitionMenu.createObjectButtons = function() {
     width: 0.07,
     height: 0.04,
     color: '#4285F4',
-    position: '-0.06 -0.06 0',
+    position: '-0.07 -0.03 0',
     id: 'object-start-button',
     handler: () => this.handleStartButton()
   });
@@ -98,17 +99,17 @@ ObjectDefinitionMenu.createObjectButtons = function() {
     width: 0.07,
     height: 0.04,
     color: '#DB4437',
-    position: '0.06 -0.06 0',
+    position: '0.07 -0.03 0',
     handler: () => this.handleCancelButton()
   });
   this.container.appendChild(cancelBtn);
   
   // Add back button
   const backBtn = this.createButton({
-    label: 'Back',
+    label: 'Back to Main Menu',
     color: '#999999',
     position: `0 ${-height/2 + 0.03} 0`,
-    width: 0.06,
+    width: 0.12,
     height: 0.03,
     handler: () => this.handleBackButton()
   });
@@ -122,10 +123,10 @@ ObjectDefinitionMenu.createResetButton = function() {
   // Add a reset button that clears current object
   const resetBtn = this.createButton({
     label: 'Reset',
-    width: 0.07,
-    height: 0.04,
+    width: 0.06,
+    height: 0.03,
     color: '#F4B400', // Yellow/orange warning color
-    position: '0 -0.12 0', // Position below other buttons
+    position: '0 -0.03 0', 
     handler: () => this.handleResetButton()
   });
   this.container.appendChild(resetBtn);
@@ -136,27 +137,27 @@ ObjectDefinitionMenu.handleResetButton = function() {
   console.log('Object Definition Menu: Reset current object');
   
   // Emit reset event - this will only reset the current point selection
-  this.sceneEl.emit('object-action', { action: 'reset-current-object' });
+  emitEvent(this.sceneEl, EVENTS.OBJECT.ACTION, { action: 'reset-current-object' });
   
   // Update status text
   const statusElement = document.getElementById('object-status');
   if (statusElement) {
-    statusElement.setAttribute('value', 'Current object reset');
+    statusElement.setAttribute('value', 'Object reset. Place the first corner point');
   }
   
-  // Reset start button to initial state
+  // Update the start button to show Complete since we're keeping the active state
   const startButton = document.getElementById('object-start-button');
   if (startButton) {
     startButton.setAttribute('button', {
-      label: 'Start',
-      color: '#4285F4' // Blue
+      label: 'Complete', // Keep it in Complete state since we're still active
+      color: '#0F9D58' // Green
     });
   }
   
-  // Reset instructions to initial state
+  // Update instructions to guide the user for the next point
   const instructionsElement = document.getElementById('object-instructions');
   if (instructionsElement) {
-    instructionsElement.setAttribute('value', 'Define an object by placing three corner points');
+    instructionsElement.setAttribute('value', 'Place the first corner point (top left)');
   }
   
   // Update side panel to make sure it's current
@@ -170,7 +171,7 @@ ObjectDefinitionMenu.handleStartButton = function() {
   
   if (currentLabel === 'Start') {
     // Emit start object definition event
-    this.sceneEl.emit('object-action', { action: 'start-object-definition' });
+    emitEvent(this.sceneEl, EVENTS.OBJECT.ACTION, { action: 'start-object-definition' });
     
     // Update button to "Complete" for finishing the object
     startButton.setAttribute('button', {
@@ -179,7 +180,7 @@ ObjectDefinitionMenu.handleStartButton = function() {
     });
   } else if (currentLabel === 'Complete') {
     // Emit complete object definition event
-    this.sceneEl.emit('object-action', { action: 'complete-object-definition' });
+    emitEvent(this.sceneEl, EVENTS.OBJECT.ACTION, { action: 'complete-object-definition' });
     
     // Reset button back to Start for next object
     startButton.setAttribute('button', {
@@ -199,7 +200,7 @@ ObjectDefinitionMenu.handleCancelButton = function() {
   });
   
   // Emit cancel object definition event
-  this.sceneEl.emit('object-action', { action: 'cancel-object-definition' });
+  emitEvent(this.sceneEl, EVENTS.OBJECT.ACTION, { action: 'cancel-object-definition' });
 };
 
 // Handle back button click
@@ -217,7 +218,7 @@ ObjectDefinitionMenu.setupStatusListener = function() {
   this.onObjectStatus = this.onObjectStatus.bind(this);
   
   // Listen for object status events
-  this.sceneEl.addEventListener('object-status', this.onObjectStatus);
+  this.sceneEl.addEventListener(EVENTS.OBJECT.STATUS, this.onObjectStatus);
 };
 
 // Handle object status updates
@@ -259,7 +260,7 @@ ObjectDefinitionMenu.createSidePanel = function() {
   
   // Create side panel container (to the right of the main menu)
   this.sidePanel = document.createElement('a-entity');
-  this.sidePanel.setAttribute('position', `${width/2 + 0.05} 0 0`); // Positioned to the right
+  this.sidePanel.setAttribute('position', `${width/2 + 0.16} 0 0`); // Positioned to the right
   this.sidePanel.setAttribute('id', 'object-side-panel');
   
   // Create panel background
@@ -380,7 +381,7 @@ ObjectDefinitionMenu.deleteObject = function(objectId) {
   console.log('Object Definition Menu: Deleting object', objectId);
   
   // Emit delete event
-  this.sceneEl.emit('object-action', { 
+  emitEvent(this.sceneEl, EVENTS.OBJECT.ACTION, { 
     action: 'delete-object',
     objectId: objectId
   });
@@ -395,7 +396,7 @@ ObjectDefinitionMenu.cleanup = function() {
   BaseMenu.cleanup.call(this);
   
   // Remove event listeners
-  this.sceneEl.removeEventListener('object-status', this.onObjectStatus);
+  this.sceneEl.removeEventListener(EVENTS.OBJECT.STATUS, this.onObjectStatus);
   
   // Deactivate object definition component when this menu is closed
   const objectDef = document.getElementById('objectDefinition');

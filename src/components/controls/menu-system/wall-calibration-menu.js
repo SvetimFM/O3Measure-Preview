@@ -6,6 +6,7 @@
 
 import BaseMenu from './base-menu.js';
 import MenuRegistry from './menu-registry.js';
+import { EVENTS, emitEvent } from '../../../utils/events.js';
 
 // Wall calibration menu implementation
 const WallCalibrationMenu = Object.create(BaseMenu);
@@ -97,11 +98,11 @@ WallCalibrationMenu.handleButtonPress = function(action, event) {
   switch(action) {
     case 'adjust-wall':
       // Also emit wall calibration action
-      this.sceneEl.emit('wall-calibration-action', { action });
+      emitEvent(this.sceneEl, EVENTS.WALL.ADJUST_START, { action });
       break;
     case 'reset-wall-calibration':
       // Also emit wall calibration action
-      this.sceneEl.emit('wall-calibration-action', { action });
+      emitEvent(this.sceneEl, EVENTS.WALL.RESET, { action });
       break;
   }
   
