@@ -57,7 +57,7 @@ MainMenu.createMenuButtons = function() {
     },
     { 
       label: 'Wall Calibration', 
-      color: '#F4B400', 
+      color: Colors.WARNING, 
       position: `0 ${startY - spacing*2} 0`,
       handler: (event) => this.handleButtonPress('wall-calibration', event)
     }

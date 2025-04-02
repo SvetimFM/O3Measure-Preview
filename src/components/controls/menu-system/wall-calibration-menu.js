@@ -6,7 +6,9 @@
 
 import BaseMenu from './base-menu.js';
 import MenuRegistry from './menu-registry.js';
-import { EVENTS, emitEvent } from '../../../utils/events.js';
+import { events, Colors } from '../../../utils/index.js';
+
+const { EVENTS, emitEvent } = events;
 
 // Wall calibration menu implementation
 const WallCalibrationMenu = Object.create(BaseMenu);

@@ -5,6 +5,10 @@
  * Responds to calibration events to update wall properties
  */
 
+import { events, Colors } from '../../utils/index.js';
+
+const { EVENTS } = events;
+
 AFRAME.registerComponent('wall-plane', {
   schema: {
     width: { type: 'number', default: 2 },
@@ -131,9 +135,9 @@ AFRAME.registerComponent('wall-plane', {
   
   setupEventListeners: function() {
     // Listen for wall-related events
-    this.el.sceneEl.addEventListener('wall-reset', this.onWallReset.bind(this));
-    this.el.sceneEl.addEventListener('wall-adjust-start', this.onWallAdjustStart.bind(this));
-    this.el.sceneEl.addEventListener('scene-state-changed', this.onStateChanged.bind(this));
+    this.el.sceneEl.addEventListener(EVENTS.WALL.RESET, this.onWallReset.bind(this));
+    this.el.sceneEl.addEventListener(EVENTS.WALL.ADJUST_START, this.onWallAdjustStart.bind(this));
+    this.el.sceneEl.addEventListener(EVENTS.STATE.CHANGED, this.onStateChanged.bind(this));
   },
   
   onWallReset: function() {
@@ -215,9 +219,9 @@ AFRAME.registerComponent('wall-plane', {
   
   remove: function() {
     // Remove event listeners
-    this.el.sceneEl.removeEventListener('wall-reset', this.onWallReset);
-    this.el.sceneEl.removeEventListener('wall-adjust-start', this.onWallAdjustStart);
-    this.el.sceneEl.removeEventListener('scene-state-changed', this.onStateChanged);
+    this.el.sceneEl.removeEventListener(EVENTS.WALL.RESET, this.onWallReset);
+    this.el.sceneEl.removeEventListener(EVENTS.WALL.ADJUST_START, this.onWallAdjustStart);
+    this.el.sceneEl.removeEventListener(EVENTS.STATE.CHANGED, this.onStateChanged);
     
     // Remove wall container and all children
     if (this.planeContainer && this.planeContainer.parentNode) {

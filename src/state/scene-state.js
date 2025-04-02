@@ -6,6 +6,10 @@
  * Components can access and modify state through this system
  */
 
+import { events, geometry } from '../utils/index.js';
+
+const { EVENTS, emitEvent } = events;
+
 AFRAME.registerSystem('scene-state', {
   schema: {},
   
@@ -37,8 +41,8 @@ AFRAME.registerSystem('scene-state', {
   },
   
   setupEventListeners: function() {
-    this.el.addEventListener('scene-state-update', this.onStateUpdate.bind(this));
-    this.el.addEventListener('wall-calibration-action', this.onWallCalibrationAction.bind(this));
+    this.el.addEventListener(EVENTS.STATE.UPDATE, this.onStateUpdate.bind(this));
+    this.el.addEventListener(EVENTS.WALL.ACTION, this.onWallCalibrationAction.bind(this));
   },
   
   // Get state or substate
@@ -65,7 +69,7 @@ AFRAME.registerSystem('scene-state', {
     target[last] = value;
     
     // Emit state change event
-    this.el.emit('scene-state-changed', {
+    emitEvent(this.el, EVENTS.STATE.CHANGED, {
       path: path,
       value: value
     });
@@ -89,14 +93,14 @@ AFRAME.registerSystem('scene-state', {
         // Reset wall to default values
         this.updateState('calibration.wall.isCalibrated', false);
         this.updateState('calibration.wall.visible', false);
-        this.el.emit('wall-reset');
+        emitEvent(this.el, EVENTS.WALL.RESET);
         console.log('Scene State: Wall calibration reset');
         break;
         
       case 'adjust-wall':
         // Make wall visible and enter adjustment mode
         this.updateState('calibration.wall.visible', true);
-        this.el.emit('wall-adjust-start');
+        emitEvent(this.el, EVENTS.WALL.ADJUST_START);
         console.log('Scene State: Wall adjustment started');
         break;
         

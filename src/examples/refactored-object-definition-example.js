@@ -5,30 +5,37 @@
 
 // Import utilities from standardized modules
 import { 
+  geometry,
+  uiElements,
+  events,
+  interaction
+} from '../utils/index.js';
+
+const {
   calculateRectangleOrientation, 
   calculateFourthCorner, 
   metersToFormattedCm 
-} from '../utils/geometry.js';
+} = geometry;
 
-import { 
+const {
   createMarker, 
   removeMarkers, 
   createLine, 
   createPlane, 
   createMeasurementText 
-} from '../utils/ui-elements.js';
+} = uiElements;
 
-import { 
+const { 
   EVENTS, 
   emitEvent, 
   addListener, 
   removeListener 
-} from '../utils/events.js';
+} = events;
 
-import { 
+const {
   getPinchPosition, 
   debounceInteraction 
-} from '../utils/interaction.js';
+} = interaction;
 
 AFRAME.registerComponent('object-definition', {
   schema: {

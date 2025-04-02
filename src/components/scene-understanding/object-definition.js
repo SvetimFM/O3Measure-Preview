@@ -8,12 +8,25 @@
  */
 
 // Import utility modules
-import { toVector3, calculatePlaneFromPoints, calculateFourthCorner, 
-         calculateRectangleDimensions, calculateRectangleOrientation } from '../../utils/geometry.js';
-import { createMarker, removeMarkers, createLine, createFloatingText, 
-         createMeasurementText } from '../../utils/ui-elements.js';
-import { EVENTS, emitEvent } from '../../utils/events.js';
-import { getPinchPosition, debounceInteraction } from '../../utils/interaction.js';
+import { 
+  geometry, 
+  uiElements, 
+  events, 
+  interaction 
+} from '../../utils/index.js';
+
+const {
+  toVector3, calculatePlaneFromPoints, calculateFourthCorner,
+  calculateRectangleDimensions, calculateRectangleOrientation
+} = geometry;
+
+const {
+  createMarker, removeMarkers, createLine, createFloatingText,
+  createMeasurementText
+} = uiElements;
+
+const { EVENTS, emitEvent } = events;
+const { getPinchPosition, debounceInteraction } = interaction;
 
 // Define states as constants
 const STATES = {

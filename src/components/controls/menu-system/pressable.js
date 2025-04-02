@@ -6,7 +6,8 @@
  * Uses THREE.Box3 for width-aware detection across button's entire surface
  */
 
-import { EVENTS } from '../../../utils/events.js';
+import { events } from '../../../utils/index.js';
+const { EVENTS } = events;
 AFRAME.registerComponent('pressable', {
   schema: {
     pressDistance: { default: 0.008 },  // Z-distance for press detection

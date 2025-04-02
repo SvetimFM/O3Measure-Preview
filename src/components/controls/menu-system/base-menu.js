@@ -153,7 +153,7 @@ const BaseMenu = {
       label: config.label,
       width: config.width || 0.10,
       height: config.height || 0.03,
-      color: config.color || '#4285F4',
+      color: config.color || Colors.PRIMARY,
       textColor: config.textColor || '#FFFFFF'
     });
     button.setAttribute('position', config.position);

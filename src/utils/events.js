@@ -19,12 +19,14 @@ const EVENTS = {
   WALL: {
     RESET: 'wall-reset',
     ADJUST_START: 'wall-adjust-start',
-    CALIBRATION_COMPLETE: 'wall-calibration-complete'
+    CALIBRATION_COMPLETE: 'wall-calibration-complete',
+    ACTION: 'wall-calibration-action'
   },
   
   // State management events
   STATE: {
-    CHANGED: 'scene-state-changed'
+    CHANGED: 'scene-state-changed',
+    UPDATE: 'scene-state-update'
   },
   
   // Interaction events

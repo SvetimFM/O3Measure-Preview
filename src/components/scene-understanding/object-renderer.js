@@ -4,7 +4,8 @@
  * Renders saved objects on the wall plane using provided dimensions and coordinates
  */
 
-import { EVENTS } from '../../utils/events.js';
+import { events } from '../../utils/index.js';
+const { EVENTS } = events;
 
 AFRAME.registerComponent('object-renderer', {
   schema: {
