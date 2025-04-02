@@ -152,6 +152,16 @@ AFRAME.registerComponent('menu-manager', {
         this.pushMenu('wall-adjustment');
         break;
         
+      case 'object-definition':
+        // Push current menu to stack for back navigation
+        this.pushMenu('object-definition');
+        break;
+        
+      case 'view-objects':
+        // This would navigate to an object viewer menu
+        console.log('Menu Manager: View Objects feature not yet implemented');
+        break;
+        
       case 'back-to-main-menu':
         // Navigate back to main menu
         this.showMenu('main');

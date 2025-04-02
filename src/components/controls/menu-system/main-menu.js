@@ -41,27 +41,21 @@ MainMenu.createMenuButtons = function() {
   // Button config - defines labels, colors and positions
   const buttons = [
     { 
-      label: 'Placeholder', 
+      label: 'Object Definition', 
       color: '#4285F4', 
       position: `0 ${startY} 0`,
-      handler: (event) => this.handleButtonPress('placeholder', event)
+      handler: (event) => this.handleButtonPress('object-definition', event)
     },
     { 
-      label: 'Placeholder_1', 
+      label: 'View Objects', 
       color: '#0F9D58', 
       position: `0 ${startY - spacing} 0`,
-      handler: (event) => this.handleButtonPress('placeholder_1', event)
-    },
-    { 
-      label: 'Placeholder_2', 
-      color: '#DB4437', 
-      position: `0 ${startY - spacing*2} 0`,
-      handler: (event) => this.handleButtonPress('placeholder_2', event) 
+      handler: (event) => this.handleButtonPress('view-objects', event)
     },
     { 
       label: 'Wall Calibration', 
       color: '#F4B400', 
-      position: `0 ${startY - spacing*3} 0`,
+      position: `0 ${startY - spacing*2} 0`,
       handler: (event) => this.handleButtonPress('wall-calibration', event)
     }
   ];

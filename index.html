@@ -53,12 +53,10 @@
       <a-entity light="type: directional; intensity: 0.6" position="1 1 1"></a-entity>
                
       <!-- Hand tracking with grab controls -->
-      <a-entity id="leftHand" hand-tracking-grab-controls="hand: left;" obb-collider></a-entity>
-      <a-entity id="rightHand" hand-tracking-grab-controls="hand: right;" obb-collider></a-entity>
-
-      <!-- Hand tracking for visualization -->
-      <a-entity id="leftHand" hand-tracking-controls="hand: left;"></a-entity>
-      <a-entity id="rightHand" hand-tracking-controls="hand: right"></a-entity>
+      <a-entity id="leftHand" hand-tracking-controls="hand: left;" hand-tracking-grab-controls="hand: left;" obb-collider></a-entity>
+      <a-entity id="rightHand" hand-tracking-controls="hand: right;" hand-tracking-grab-controls="hand: right;" obb-collider></a-entity>
+      
+      <!-- No need for explicit pinch detection, as A-Frame's hand-tracking-controls handles it -->
       
       <!-- Interactive test objects -->
       <a-entity id="interactive-objects" position="0 1.2 -0.5">

@@ -26,7 +26,8 @@ AFRAME.registerSystem('scene-state', {
           visible: false,
           adjustmentFactor: 0.01 // How much to move per adjustment (in meters)
         }
-      }
+      },
+      objects: [] // Array for storing defined objects
     };
     
     // Setup event listeners

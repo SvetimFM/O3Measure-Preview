@@ -9,6 +9,8 @@ import './controls/menu-system/index.js';
 
 // Scene Understanding Components
 import './scene-understanding/wall-plane.js';
+import './scene-understanding/object-definition.js';
+import './scene-understanding/object-renderer.js';
 
 // Initialize all components
 console.log('O3Measure components initialized');

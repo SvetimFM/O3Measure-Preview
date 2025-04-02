@@ -92,6 +92,32 @@ document.addEventListener('DOMContentLoaded', function() {
       scene.appendChild(wallPlane);
       console.log('Wall plane added to scene');
       
+      // Create object definition entity
+      console.log('Creating object definition entity');
+      const objectDef = document.createElement('a-entity');
+      objectDef.setAttribute('object-definition', {
+        active: false, // Initially inactive
+        wallId: 'wallPlane'
+      });
+      objectDef.setAttribute('id', 'objectDefinition');
+      
+      // Add object definition to scene
+      scene.appendChild(objectDef);
+      console.log('Object definition added to scene');
+      
+      // Create object renderer entity
+      console.log('Creating object renderer entity');
+      const objectRenderer = document.createElement('a-entity');
+      objectRenderer.setAttribute('object-renderer', {
+        active: true,
+        wallId: 'wallPlane'
+      });
+      objectRenderer.setAttribute('id', 'objectRenderer');
+      
+      // Add object renderer to scene
+      scene.appendChild(objectRenderer);
+      console.log('Object renderer added to scene');
+      
       // We've integrated calibration into the menu manager
       console.log('Calibration functionality is now integrated into the menu manager');
       
