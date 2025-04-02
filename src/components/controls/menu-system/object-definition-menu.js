@@ -6,7 +6,9 @@
 
 import BaseMenu from './base-menu.js';
 import MenuRegistry from './menu-registry.js';
-import { EVENTS, emitEvent } from '../../../utils/events.js';
+import { events, Colors } from '../../../utils/index.js';
+
+const { EVENTS, emitEvent } = events;
 
 // Object definition menu implementation
 const ObjectDefinitionMenu = Object.create(BaseMenu);
@@ -142,22 +144,22 @@ ObjectDefinitionMenu.handleResetButton = function() {
   // Update status text
   const statusElement = document.getElementById('object-status');
   if (statusElement) {
-    statusElement.setAttribute('value', 'Object reset. Place the first corner point');
+    statusElement.setAttribute('value', 'Object definition reset. Press Start to begin.');
   }
   
-  // Update the start button to show Complete since we're keeping the active state
+  // Update the start button to show Start state
   const startButton = document.getElementById('object-start-button');
   if (startButton) {
     startButton.setAttribute('button', {
-      label: 'Complete', // Keep it in Complete state since we're still active
-      color: '#0F9D58' // Green
+      label: 'Start', // Reset to initial state
+      color: Colors.PRIMARY 
     });
   }
   
-  // Update instructions to guide the user for the next point
+  // Update instructions to default state
   const instructionsElement = document.getElementById('object-instructions');
   if (instructionsElement) {
-    instructionsElement.setAttribute('value', 'Place the first corner point (top left)');
+    instructionsElement.setAttribute('value', 'Define an object by placing three corner points');
   }
   
   // Update side panel to make sure it's current

@@ -6,7 +6,9 @@
  */
 
 import MenuRegistry from './menu-registry.js';
-import { EVENTS, emitEvent } from '../../../utils/events.js';
+import { events, Colors, uiElements } from '../../../utils/index.js';
+
+const { EVENTS, emitEvent } = events;
 
 // Base menu component
 const BaseMenu = {

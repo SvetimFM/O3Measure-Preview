@@ -7,7 +7,9 @@
  */
 
 import { MenuRegistry } from './menu-system/index.js';
-import { EVENTS } from '../../utils/events.js';
+import { events, Colors } from '../../utils/index.js';
+
+const { EVENTS } = events;
 
 AFRAME.registerComponent('menu-manager', {
   schema: {

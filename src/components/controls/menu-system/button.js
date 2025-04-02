@@ -5,14 +5,16 @@
  * Following A-Frame's hand tracking examples
  */
 
-import { EVENTS } from '../../../utils/events.js';
+import { events, Colors } from '../../../utils/index.js';
+
+const { EVENTS, emitEvent } = events;
 
 AFRAME.registerComponent('button', {
   schema: {
     label: {type: 'string', default: 'Button'},
     width: {type: 'number', default: 0.04},
     height: {type: 'number', default: 0.02},
-    color: {type: 'color', default: '#4285F4'},
+    color: {type: 'color', default: Colors.PRIMARY},
     hoverColor: {type: 'color', default: '#5794F7'},
     pressColor: {type: 'color', default: '#A36736'},
     textColor: {type: 'color', default: '#FFFFFF'},
@@ -51,9 +53,9 @@ AFRAME.registerComponent('button', {
     this.buttonText.setAttribute('color', data.textColor);
     this.buttonText.setAttribute('align', 'center');
     this.buttonText.setAttribute('position', '0 0 0.001');
-    this.buttonText.setAttribute('width', data.height * 60); // Scale text appropriately
+    this.buttonText.setAttribute('width', data.height * 60);
     this.buttonText.setAttribute('wrap-count', 20);
-    this.buttonText.setAttribute('scale', '0.07 0.07 0.07'); // Enlarged text
+    this.buttonText.setAttribute('scale', '0.07 0.07 0.07');
     
     // Add elements to button entity
     el.appendChild(this.buttonBackground);
@@ -101,7 +103,7 @@ AFRAME.registerComponent('button', {
     this.updateButtonState();
     
     // Emit event for audio feedback
-    this.el.emit(EVENTS.BUTTON.PRESS_STARTED, {id: this.el.id, label: this.data.label});
+    emitEvent(this.el, EVENTS.BUTTON.PRESS_STARTED, {id: this.el.id, label: this.data.label});
   },
   
   onPressedEnded: function(evt) {
@@ -115,7 +117,7 @@ AFRAME.registerComponent('button', {
     this.updateButtonState();
     
     // Emit click event for other components to listen to
-    this.el.emit(EVENTS.BUTTON.PRESS_ENDED, {
+    emitEvent(this.el, EVENTS.BUTTON.PRESS_ENDED, {
       id: this.el.id, 
       label: this.data.label,
       toggled: this.toggled

@@ -155,21 +155,17 @@ AFRAME.registerComponent('object-definition', {
         break;
         
       case 'reset-current-object':
-        // Reset current object but stay active
-        console.log('Object Definition: Resetting current object state to PLACING_POINT_1');
+        // Just reset the current object (don't change state to PLACING_POINT_1)
+        console.log('Object Definition: Resetting current object');
         
         // Clear current points and markers
         this.reset();
         
-        // Set back to active placing state
-        this.setState(STATES.PLACING_POINT_1);
-        
-        // Ensure component remains active
-        this.data.active = true;
-        this.setVisibility(true);
+        // Keep original state (IDLE)
+        this.setState(STATES.IDLE);
         
         // Emit status update
-        this.emitStatus('started', 'Object reset. Place the first corner point (top left)');
+        this.emitStatus('reset', 'Object definition reset. Ready for new object.');
         break;
         
       case 'delete-object':

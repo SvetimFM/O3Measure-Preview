@@ -6,7 +6,9 @@
 
 import BaseMenu from './base-menu.js';
 import MenuRegistry from './menu-registry.js';
-import { EVENTS, emitEvent } from '../../../utils/events.js';
+import { events, Colors } from '../../../utils/index.js';
+
+const { EVENTS, emitEvent } = events;
 
 // Main menu implementation
 const MainMenu = Object.create(BaseMenu);
@@ -43,13 +45,13 @@ MainMenu.createMenuButtons = function() {
   const buttons = [
     { 
       label: 'Object Definition', 
-      color: '#4285F4', 
+      color: Colors.PRIMARY, 
       position: `0 ${startY} 0`,
       handler: (event) => this.handleButtonPress('object-definition', event)
     },
     { 
       label: 'View Objects', 
-      color: '#0F9D58', 
+      color: Colors.SECONDARY, 
       position: `0 ${startY - spacing} 0`,
       handler: (event) => this.handleButtonPress('view-objects', event)
     },
