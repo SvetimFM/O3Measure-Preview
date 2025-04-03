@@ -1,11 +1,14 @@
 /**
  * Events Utility
  * 
- * Provides standardized event names and event management for the application.
- * Helps prevent typos and inconsistencies in event handling across components.
+ * Provides standardized event names to ensure consistency across the application.
+ * A focused utility with only what's needed for clear event handling.
  */
 
-// Define standard event names to prevent typos and maintain consistency
+/**
+ * Standard event names used throughout the application.
+ * Using constants helps prevent typos and maintain consistency.
+ */
 const EVENTS = {
   // Object-related events
   OBJECT: {
@@ -29,7 +32,7 @@ const EVENTS = {
     UPDATE: 'scene-state-update'
   },
   
-  // Interaction events
+  // Interaction events (standard A-Frame names)
   INTERACTION: {
     PINCH_STARTED: 'pinchstarted',
     PINCH_ENDED: 'pinchended',
@@ -46,11 +49,18 @@ const EVENTS = {
   BUTTON: {
     PRESS_STARTED: 'button-press-started',
     PRESS_ENDED: 'button-press-ended'
+  },
+  
+  // Anchor events
+  ANCHOR: {
+    ACTION: 'anchor-action',
+    STATUS: 'anchor-status',
+    COMPLETED: 'anchor-completed'
   }
 };
 
 /**
- * Emits an event with standardized structure
+ * Simple helper for emitting events with consistent structure
  * @param {HTMLElement} element - Element to emit event from
  * @param {String} eventName - Event name (use EVENTS constants)
  * @param {Object} data - Event data
@@ -103,10 +113,27 @@ function removeListener(element, eventName, boundHandler) {
   element.removeEventListener(eventName, boundHandler);
 }
 
+/**
+ * Emit a standardized status update event
+ * @param {HTMLElement} element - Element to emit event from
+ * @param {String} statusType - Type of status event (EVENTS.OBJECT.STATUS, EVENTS.ANCHOR.STATUS, etc.)
+ * @param {String} status - Status code (started, in-progress, completed, etc.)
+ * @param {String} message - Human-readable status message
+ * @param {Object} additionalData - Any additional data to include
+ */
+function emitStatus(element, statusType, status, message, additionalData = {}) {
+  emitEvent(element, statusType, {
+    status,
+    message,
+    ...additionalData
+  });
+}
+
 // Export event utilities
 export {
   EVENTS,
   emitEvent,
   addListener,
-  removeListener
+  removeListener,
+  emitStatus
 };

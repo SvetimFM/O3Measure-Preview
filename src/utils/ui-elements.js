@@ -1,71 +1,55 @@
 /**
- * UI Elements Utilities
+ * UI Elements Utility Library
  * 
- * Provides standardized functions for creating common UI elements
- * in A-Frame to maintain consistency and reduce boilerplate.
+ * Provides reusable functions for creating common UI elements in A-Frame.
+ * These utilities help maintain consistency and reduce boilerplate code.
  */
 
 // Ensure THREE is accessible in this module
 const THREE = window.THREE;
 
 /**
- * Creates an A-Frame entity with specified attributes
- * @param {Object} attributes - Key-value pairs of attributes
- * @param {Array} children - Child entities to append
- * @returns {HTMLElement} The created entity
- */
-function createEntity(attributes = {}, children = []) {
-  const entity = document.createElement('a-entity');
-  
-  // Set attributes
-  Object.entries(attributes).forEach(([key, value]) => {
-    entity.setAttribute(key, value);
-  });
-  
-  // Add children
-  children.forEach(child => {
-    if (child) entity.appendChild(child);
-  });
-  
-  return entity;
-}
-
-/**
  * Creates a marker at a point in 3D space
- * @param {THREE.Vector3} position - Position for the marker
- * @param {Number|String} index - Index number or label
- * @param {String} color - Color for the marker
- * @param {HTMLElement} scene - A-Frame scene to add marker to
- * @returns {HTMLElement} The created marker
+ * @param {Object|THREE.Vector3} position - Position for the marker
+ * @param {Number|String} label - Text label for the marker
+ * @param {String} color - Color for the marker (hex format)
+ * @param {HTMLElement} [parent] - Optional parent to add marker to
+ * @returns {HTMLElement} The created marker entity
  */
-function createMarker(position, index, color, scene) {
-  // Create a visual marker at the selected point
+function createMarker(position, label, color = '#4285F4', parent = null) {
+  // Create a visual marker at the specified point
   const marker = document.createElement('a-entity');
-  marker.setAttribute('class', 'point-marker');
+  marker.setAttribute('class', 'marker');
   
   // Create sphere for the marker
   const sphere = document.createElement('a-sphere');
   sphere.setAttribute('radius', 0.01);
-  sphere.setAttribute('color', color || '#4285F4');
+  sphere.setAttribute('color', color);
   sphere.setAttribute('shader', 'flat');
   marker.appendChild(sphere);
   
-  // Create label
-  const label = document.createElement('a-text');
-  label.setAttribute('value', `${index || ''}`);
-  label.setAttribute('align', 'center');
-  label.setAttribute('position', '0 0.05 0');
-  label.setAttribute('scale', '0.1 0.1 0.1');
-  label.setAttribute('color', '#FFFFFF');
-  label.setAttribute('look-at', '[camera]');
-  marker.appendChild(label);
+  // Add label if provided
+  if (label) {
+    const labelEntity = document.createElement('a-text');
+    labelEntity.setAttribute('value', `${label}`);
+    labelEntity.setAttribute('align', 'center');
+    labelEntity.setAttribute('position', '0 0.05 0');
+    labelEntity.setAttribute('scale', '0.1 0.1 0.1');
+    labelEntity.setAttribute('color', '#FFFFFF');
+    labelEntity.setAttribute('look-at', '[camera]');
+    marker.appendChild(labelEntity);
+  }
   
-  // Position marker
-  marker.setAttribute('position', position);
+  // Set position
+  if (position instanceof THREE.Vector3) {
+    marker.setAttribute('position', position);
+  } else {
+    marker.setAttribute('position', position);
+  }
   
-  // Add to scene
-  if (scene) {
-    scene.appendChild(marker);
+  // Add to parent if provided
+  if (parent) {
+    parent.appendChild(marker);
   }
   
   return marker;
@@ -77,31 +61,34 @@ function createMarker(position, index, color, scene) {
  * @returns {Array} Empty array
  */
 function removeMarkers(markers) {
-  // Remove all point markers from scene
+  if (!markers || !Array.isArray(markers)) return [];
+  
+  // Remove all markers from their parents
   markers.forEach(marker => {
     if (marker && marker.parentNode) {
       marker.parentNode.removeChild(marker);
     }
   });
+  
   return [];
 }
 
 /**
  * Creates a line between two points
- * @param {THREE.Vector3} start - Start position
- * @param {THREE.Vector3} end - End position
+ * @param {Object|THREE.Vector3} start - Start position
+ * @param {Object|THREE.Vector3} end - End position
  * @param {String} color - Color for the line
  * @param {Boolean} dashed - Whether line should be dashed
+ * @param {HTMLElement} [parent] - Optional parent to add line to
  * @returns {HTMLElement} A-Frame entity with line component
  */
-function createLine(start, end, color = '#FFFFFF', dashed = false) {
+function createLine(start, end, color = '#FFFFFF', dashed = false, parent = null) {
   const line = document.createElement('a-entity');
   const lineAttr = {
     start: start,
     end: end,
     color: color,
-    opacity: 0.8,
-    visible: true
+    opacity: 0.8
   };
   
   if (dashed) {
@@ -109,22 +96,30 @@ function createLine(start, end, color = '#FFFFFF', dashed = false) {
   }
   
   line.setAttribute('line', lineAttr);
+  
+  // Add to parent if provided
+  if (parent) {
+    parent.appendChild(line);
+  }
+  
   return line;
 }
 
 /**
  * Creates a text entity that faces the camera
  * @param {String} value - Text to display
- * @param {THREE.Vector3} position - Position in 3D space
+ * @param {Object|THREE.Vector3} position - Position in 3D space
  * @param {Object} options - Additional options (color, scale, etc)
+ * @param {HTMLElement} [parent] - Optional parent to add text to
  * @returns {HTMLElement} A-Frame text entity
  */
-function createFloatingText(value, position, options = {}) {
+function createFloatingText(value, position, options = {}, parent = null) {
   const defaults = {
     color: '#FFFFFF',
     scale: '0.1 0.1 0.1',
     align: 'center',
-    lookAt: '[camera]'
+    lookAt: '[camera]',
+    className: null // Optional CSS class for the text
   };
   
   const settings = {...defaults, ...options};
@@ -140,32 +135,49 @@ function createFloatingText(value, position, options = {}) {
     text.setAttribute('look-at', settings.lookAt);
   }
   
+  // Add CSS class if provided
+  if (settings.className) {
+    text.classList.add(settings.className);
+  }
+  
+  // Add to parent if provided
+  if (parent) {
+    parent.appendChild(text);
+  }
+  
   return text;
 }
 
 /**
  * Creates measurement text for an object dimension
  * @param {Number} measurement - Measurement in meters
- * @param {THREE.Vector3} position - Position for the text
+ * @param {Object|THREE.Vector3} position - Position for the text
  * @param {String} unit - Unit to display (default: 'cm')
  * @param {Object} options - Additional options
+ * @param {HTMLElement} [parent] - Optional parent to add text to
  * @returns {HTMLElement} A-Frame text entity
  */
-function createMeasurementText(measurement, position, unit = 'cm', options = {}) {
+function createMeasurementText(measurement, position, unit = 'cm', options = {}, parent = null) {
   // Format the measurement (convert to cm by default)
   const formattedValue = unit === 'cm' 
     ? `${(measurement * 100).toFixed(1)} ${unit}`
     : `${measurement.toFixed(2)} ${unit}`;
   
-  return createFloatingText(formattedValue, position, options);
+  // Add default className for measurement texts if not specified
+  if (!options.className) {
+    options.className = 'dimension-text';
+  }
+  
+  return createFloatingText(formattedValue, position, options, parent);
 }
 
 /**
  * Creates a simple plane
  * @param {Object} attributes - Attributes for the plane
+ * @param {HTMLElement} [parent] - Optional parent to add plane to
  * @returns {HTMLElement} A-Frame plane entity
  */
-function createPlane(attributes = {}) {
+function createPlane(attributes = {}, parent = null) {
   const defaults = {
     width: 1,
     height: 1, 
@@ -182,52 +194,46 @@ function createPlane(attributes = {}) {
     plane.setAttribute(key, value);
   });
   
+  // Add to parent if provided
+  if (parent) {
+    parent.appendChild(plane);
+  }
+  
   return plane;
 }
 
 /**
- * Creates a rectangle visualization with corners and edges
- * @param {Array<THREE.Vector3>} points - Corner points
- * @param {Object} options - Additional options
- * @returns {HTMLElement} Container entity with rectangle visualization
+ * Create and manage a visualization entity with cleanup support
+ * @param {HTMLElement} oldVisual - Existing visualization to clean up (if any)
+ * @param {HTMLElement} parent - Parent element to attach visualization to
+ * @param {String} className - Class name for the visualization
+ * @returns {HTMLElement} The new visualization entity
  */
-function createRectangleOutline(points, options = {}) {
-  const defaults = {
-    colors: ['#4285F4', '#0F9D58', '#F4B400', '#DB4437'], // Google colors
-    lineWidth: 0.005,
-    container: null
-  };
-  
-  const settings = {...defaults, ...options};
-  
-  // Create container if not provided
-  const container = settings.container || document.createElement('a-entity');
-  container.setAttribute('class', 'rectangle-outline');
-  
-  // Draw lines between points
-  const numPoints = points.length;
-  if (numPoints < 3) return container;
-  
-  for (let i = 0; i < numPoints; i++) {
-    const start = points[i];
-    const end = points[(i + 1) % numPoints];
-    const color = settings.colors[i % settings.colors.length];
-    
-    const line = createLine(start, end, color);
-    container.appendChild(line);
+function createVisualizationEntity(oldVisual, parent, className = 'visualization') {
+  // Clean up old visualization if it exists
+  if (oldVisual && oldVisual.parentNode) {
+    oldVisual.parentNode.removeChild(oldVisual);
   }
   
-  return container;
+  // Create container for new visualization
+  const visualization = document.createElement('a-entity');
+  visualization.setAttribute('class', className);
+  
+  // Add to parent if provided
+  if (parent) {
+    parent.appendChild(visualization);
+  }
+  
+  return visualization;
 }
 
 // Export utility functions
 export {
-  createEntity,
   createMarker,
   removeMarkers,
   createLine,
   createFloatingText,
   createMeasurementText,
   createPlane,
-  createRectangleOutline
+  createVisualizationEntity
 };

@@ -3,39 +3,28 @@
  * 
  * Creates and manages the process of defining rectangular objects on walls
  * by placing corner points and calculating dimensions.
- * 
- * This implementation uses a state machine pattern for clearer state management.
  */
 
 // Import utility modules
 import { 
   geometry, 
   uiElements, 
-  events, 
-  interaction 
+  events,
+  interaction
 } from '../../utils/index.js';
 
 const {
-  toVector3, calculatePlaneFromPoints, calculateFourthCorner,
+  toVector3, calculateFourthCorner,
   calculateRectangleDimensions, calculateRectangleOrientation
 } = geometry;
 
 const {
   createMarker, removeMarkers, createLine, createFloatingText,
-  createMeasurementText
+  createMeasurementText, createVisualizationEntity
 } = uiElements;
 
-const { EVENTS, emitEvent } = events;
-const { getPinchPosition, debounceInteraction } = interaction;
-
-// Define states as constants
-const STATES = {
-  IDLE: 'idle',               // Not currently defining an object
-  PLACING_POINT_1: 'point_1', // Placing the first point (top-left)
-  PLACING_POINT_2: 'point_2', // Placing the second point (top-right)
-  PLACING_POINT_3: 'point_3', // Placing the third point (bottom-right)
-  PREVIEW: 'preview'          // All points placed, ready to finalize
-};
+const { EVENTS, emitEvent, emitStatus } = events;
+const { getPinchPosition } = interaction;
 
 AFRAME.registerComponent('object-definition', {
   schema: {
@@ -51,8 +40,8 @@ AFRAME.registerComponent('object-definition', {
     this.objects = [];
     this.pointColors = ['#4285F4', '#0F9D58', '#F4B400']; // Google colors for 3 points
     
-    // Point selection state
-    this.state = STATES.IDLE;
+    // Internal state - simplified with just the essential properties
+    this.step = 0; // 0: idle, 1: placing point 1, 2: placing point 2, 3: placing point 3, 4: preview
     this.points = [];
     this.markers = [];
     this.visualObject = null;
@@ -71,75 +60,7 @@ AFRAME.registerComponent('object-definition', {
     // Initialize component state
     this.setVisibility(this.data.visible && this.data.active);
     
-    console.log('Object Definition: Initialized in state:', this.state);
-  },
-  
-  /**
-   * State transition function - centralizes all state changes
-   * @param {String} newState - New state to transition to
-   */
-  setState: function(newState) {
-    const oldState = this.state;
-    console.log(`Object Definition: State transition ${oldState} -> ${newState}`);
-    
-    // Pre-transition cleanup
-    if (newState === STATES.IDLE && oldState !== STATES.IDLE) {
-      this.reset();
-    }
-    
-    // Update state
-    this.state = newState;
-    
-    // Post-transition setup
-    switch(newState) {
-      case STATES.IDLE:
-        // Nothing specific to do
-        break;
-        
-      case STATES.PLACING_POINT_1:
-        this.emitStatus('started', 'Place the first corner point (top left)');
-        break;
-        
-      case STATES.PLACING_POINT_2:
-        this.emitStatus('in-progress', 'Place the second corner point (top right)');
-        break;
-        
-      case STATES.PLACING_POINT_3:
-        this.emitStatus('in-progress', 'Place the third corner point (bottom right)');
-        break;
-        
-      case STATES.PREVIEW:
-        // Calculate dimensions
-        const width = this.points[0].distanceTo(this.points[1]);
-        const height = this.points[1].distanceTo(this.points[2]);
-        const widthCm = (width * 100).toFixed(1);
-        const heightCm = (height * 100).toFixed(1);
-        
-        // Update visualization one more time to ensure it's complete
-        this.updateObjectVisualization();
-        
-        // Emit status with dimensions
-        this.emitStatus('preview', 
-          `OBJECT READY! ${widthCm}×${heightCm} cm. Click "Complete" to save or "Reset" to start over.`,
-          { widthCm, heightCm }
-        );
-        break;
-    }
-  },
-  
-  /**
-   * Helper to emit status updates with consistent format
-   * @param {String} status - Status code (started, in-progress, preview, etc.)
-   * @param {String} message - Status message to display
-   * @param {Object} additionalData - Any additional data to include
-   */
-  emitStatus: function(status, message, additionalData = {}) {
-    emitEvent(this.el, EVENTS.OBJECT.STATUS, {
-      status: status,
-      message: message,
-      pointCount: this.points.length,
-      ...additionalData
-    });
+    console.log('Object Definition: Initialized');
   },
   
   setupEventListeners: function() {
@@ -159,7 +80,8 @@ AFRAME.registerComponent('object-definition', {
         break;
         
       case 'cancel-object-definition':
-        this.setState(STATES.IDLE);
+        this.reset();
+        this.step = 0;
         this.emitStatus('cancelled', 'Object definition cancelled');
         break;
         
@@ -168,44 +90,54 @@ AFRAME.registerComponent('object-definition', {
         break;
         
       case 'reset-current-object':
-        // Just reset the current object (don't change state to PLACING_POINT_1)
-        console.log('Object Definition: Resetting current object');
-        
-        // Clear current points and markers
         this.reset();
-        
-        // Keep original state (IDLE)
-        this.setState(STATES.IDLE);
-        
-        // Emit status update
-        this.emitStatus('reset', 'Object definition reset. Ready for new object.');
+        // Set step to 1 (placing first point) to stay in object creation mode
+        // instead of going back to idle (0)
+        this.step = 1;
+        this.emitStatus('reset', 'Object reset. Place the first corner point (top left).');
         break;
         
       case 'delete-object':
         this.deleteObject(event.detail.objectId);
         break;
+      
+      case 'toggle-object-visibility':
+        this.toggleObjectVisibility(event.detail.objectId);
+        break;
     }
+  },
+  
+  emitStatus: function(status, message, additionalData = {}) {
+    // Use the utility function but add pointCount to all status updates
+    emitStatus(this.el, EVENTS.OBJECT.STATUS, status, message, {
+      pointCount: this.points.length,
+      ...additionalData
+    });
   },
   
   startObjectDefinition: function() {
     console.log('Object Definition: Starting new object definition');
     
-    // Transition to placing first point
-    this.setState(STATES.PLACING_POINT_1);
+    // Reset and transition to placing first point
+    this.reset();
+    this.step = 1;
     
     // Show component
     this.setVisibility(true);
+    
+    // Emit status update
+    this.emitStatus('started', 'Place the first corner point (top left)');
   },
   
   completeObjectDefinition: function() {
     console.log('Object Definition: Completing current object definition');
     
     // Only complete if we have 3 points and are in preview state
-    if (this.points.length === 3 && this.state === STATES.PREVIEW) {
+    if (this.points.length === 3 && this.step === 4) {
       this.finalizeObject();
     } else if (this.points.length === 3) {
       // We have 3 points but aren't in preview mode yet - force to preview then finalize
-      this.setState(STATES.PREVIEW);
+      this.step = 4;
       this.finalizeObject();
     } else {
       console.warn('Object Definition: Cannot complete, not enough points defined');
@@ -217,13 +149,11 @@ AFRAME.registerComponent('object-definition', {
   // Handle pinch events for point selection
   onPinchStarted: function(event) {
     // Only process pinch events when component is active and in a point-placing state
-    const validStates = [STATES.PLACING_POINT_1, STATES.PLACING_POINT_2, STATES.PLACING_POINT_3];
-    
-    if (!this.data.active || !validStates.includes(this.state)) {
+    if (!this.data.active || this.step === 0 || this.step > 3) {
       return;
     }
     
-    console.log('Object Definition: Pinch detected in state:', this.state);
+    console.log('Object Definition: Pinch detected in step:', this.step);
     
     // Prevent multiple pinches from being processed too quickly
     const now = Date.now();
@@ -233,8 +163,8 @@ AFRAME.registerComponent('object-definition', {
     }
     this.lastPinchTime = now;
     
-    // Get position from pinch event
-    let worldPosition = getPinchPosition(event);
+    // Get position from pinch event using interaction utility
+    const worldPosition = getPinchPosition(event);
     if (!worldPosition) {
       console.error('Object Definition: Could not get pinch position');
       return;
@@ -266,30 +196,51 @@ AFRAME.registerComponent('object-definition', {
       this.updateObjectVisualization();
     }
     
-    // Transition to next state based on current state
-    switch(this.state) {
-      case STATES.PLACING_POINT_1:
-        this.setState(STATES.PLACING_POINT_2);
+    // Transition to next step based on current step
+    let statusMessage = '';
+    
+    switch(this.step) {
+      case 1:
+        this.step = 2;
+        statusMessage = 'Place the second corner point (top right)';
         break;
-      case STATES.PLACING_POINT_2:
-        this.setState(STATES.PLACING_POINT_3);
+      case 2:
+        this.step = 3;
+        statusMessage = 'Place the third corner point (bottom right)';
         break;
-      case STATES.PLACING_POINT_3:
-        this.setState(STATES.PREVIEW);
-        break;
+      case 3:
+        // Calculate dimensions
+        const width = this.points[0].distanceTo(this.points[1]);
+        const height = this.points[1].distanceTo(this.points[2]);
+        const widthCm = (width * 100).toFixed(1);
+        const heightCm = (height * 100).toFixed(1);
+        
+        this.step = 4;
+        statusMessage = `OBJECT READY! ${widthCm}×${heightCm} cm. Click "Complete" to save or "Reset" to start over.`;
+        
+        // Force update visualization
+        this.updateObjectVisualization();
+        
+        // Add dimensions data
+        this.emitStatus('preview', statusMessage, { 
+          widthCm, 
+          heightCm 
+        });
+        return;
     }
+    
+    // Emit status update
+    this.emitStatus(this.step === 1 ? 'started' : 'in-progress', statusMessage);
   },
   
   // Update the visual representation of the rectangle
   updateObjectVisualization: function() {
-    // Remove previous visualization
-    if (this.visualObject && this.visualObject.parentNode) {
-      this.visualObject.parentNode.removeChild(this.visualObject);
-    }
-    
-    // Create new visualization entity
-    this.visualObject = document.createElement('a-entity');
-    this.visualObject.setAttribute('class', 'object-visualization');
+    // Create or update visualization entity using utility
+    this.visualObject = createVisualizationEntity(
+      this.visualObject, 
+      this.el.sceneEl, 
+      'object-visualization'
+    );
     
     // Draw lines between points
     const linePoints = [...this.points];
@@ -297,12 +248,13 @@ AFRAME.registerComponent('object-definition', {
     // Create lines based on number of points
     if (linePoints.length === 2) {
       // For 2 points, create a simple line
-      this.createLine(linePoints[0], linePoints[1], '#4285F4');
+      const line = createLine(linePoints[0], linePoints[1], '#4285F4');
+      this.visualObject.appendChild(line);
     } else if (linePoints.length === 3) {
       // For 3 points, create a complete triangle and render the plane
-      this.createLine(linePoints[0], linePoints[1], '#4285F4'); // Top edge
-      this.createLine(linePoints[1], linePoints[2], '#0F9D58'); // Right edge
-      this.createLine(linePoints[2], linePoints[0], '#DB4437'); // Closing edge
+      this.visualObject.appendChild(createLine(linePoints[0], linePoints[1], '#4285F4')); // Top edge
+      this.visualObject.appendChild(createLine(linePoints[1], linePoints[2], '#0F9D58')); // Right edge
+      this.visualObject.appendChild(createLine(linePoints[2], linePoints[0], '#DB4437')); // Closing edge
       
       // Calculate and render the object plane
       this.renderObjectPlane(linePoints[0], linePoints[1], linePoints[2]);
@@ -310,26 +262,13 @@ AFRAME.registerComponent('object-definition', {
       // Add dimensions text
       this.addDimensionsText();
     }
-    
-    // Add to scene
-    this.el.sceneEl.appendChild(this.visualObject);
-  },
-  
-  // Create a line between two points
-  createLine: function(start, end, color, dashed = false) {
-    if (!this.visualObject) return;
-    
-    // Use the createLine utility function
-    const line = createLine(start, end, color, dashed);
-    this.visualObject.appendChild(line);
-    return line;
   },
   
   // Render a plane with the correct orientation
   renderObjectPlane: function(p1, p2, p3) {
     // Points: p1 = top-left, p2 = top-right, p3 = bottom-right
     
-    // Use utility functions for calculations
+    // Calculate width and height
     const width = p1.distanceTo(p2);
     const height = p2.distanceTo(p3);
     
@@ -361,7 +300,7 @@ AFRAME.registerComponent('object-definition', {
   addDimensionsText: function() {
     if (this.points.length < 3 || !this.visualObject) return;
     
-    // Calculate dimensions using geometry utility function
+    // Calculate dimensions
     const p1 = this.points[0];
     const p2 = this.points[1];
     const p3 = this.points[2];
@@ -370,34 +309,36 @@ AFRAME.registerComponent('object-definition', {
     const width = p1.distanceTo(p2);
     const height = p2.distanceTo(p3);
     
-    // Calculate center of the three points
-    const center = new THREE.Vector3()
-      .add(p1).add(p2).add(p3)
-      .divideScalar(3);
-    
     // Calculate positions for dimension labels
     const widthTextPos = new THREE.Vector3()
-      .add(p1).add(p2)
+      .addVectors(p1, p2)
       .divideScalar(2)
       .add(new THREE.Vector3(0, 0.05, 0));
     
     const heightTextPos = new THREE.Vector3()
-      .add(p2).add(p3)
+      .addVectors(p2, p3)
       .divideScalar(2)
       .add(new THREE.Vector3(0.05, 0, 0));
     
-    // Use utility functions to create text elements
+    // Center of the three points
+    const center = new THREE.Vector3()
+      .add(p1).add(p2).add(p3)
+      .divideScalar(3);
+    
+    // Create text elements
     const widthText = createMeasurementText(width, widthTextPos, 'cm', {
       color: '#FFFFFF',
       scale: '0.1 0.1 0.1',
-      lookAt: '[camera]'
+      lookAt: '[camera]',
+      className: 'dimension-text'
     });
     this.visualObject.appendChild(widthText);
     
     const heightText = createMeasurementText(height, heightTextPos, 'cm', {
       color: '#FFFFFF',
       scale: '0.1 0.1 0.1',
-      lookAt: '[camera]'
+      lookAt: '[camera]',
+      className: 'dimension-text'
     });
     this.visualObject.appendChild(heightText);
     
@@ -406,7 +347,8 @@ AFRAME.registerComponent('object-definition', {
     const areaText = createFloatingText(`${areaCmSq} cm²`, center, {
       color: '#FFFFFF',
       scale: '0.1 0.1 0.1',
-      lookAt: '[camera]'
+      lookAt: '[camera]',
+      className: 'area-text'
     });
     this.visualObject.appendChild(areaText);
   },
@@ -418,7 +360,7 @@ AFRAME.registerComponent('object-definition', {
       return;
     }
     
-    // Use utility functions for calculations
+    // Get the three defined points
     const p1 = this.points[0]; // top-left
     const p2 = this.points[1]; // top-right
     const p3 = this.points[2]; // bottom-right
@@ -433,26 +375,32 @@ AFRAME.registerComponent('object-definition', {
     const dimensions = calculateRectangleDimensions(points);
     const center = dimensions.center;
     
-    // Get orientation using the utility function
+    // Get orientation
     const rotation = calculateRectangleOrientation(p1, p2, p3);
     
     // Create object data
+    const objectId = 'object_' + Date.now();
     const objectData = {
-      id: 'object_' + Date.now(),
+      id: objectId,
       type: 'rectangle',
       points: this.points.map(p => ({ x: p.x, y: p.y, z: p.z })),
-      width: width,
-      height: height,
+      width,
+      height,
       center: {
         x: center.x,
         y: center.y,
         z: center.z
       },
-      rotation: rotation,
-      visible: true,
+      rotation,
+      visible: true, // Objects are visible by default
       locked: false,
       createdAt: new Date().toISOString()
     };
+    
+    // If we keep the visualization, give it an ID tied to the object
+    if (this.visualObject) {
+      this.visualObject.setAttribute('id', `visual-${objectId}`);
+    }
     
     // Add to objects array
     this.objects.push(objectData);
@@ -470,8 +418,8 @@ AFRAME.registerComponent('object-definition', {
     // Emit status update
     this.emitStatus('completed', 'Object defined successfully', {
       dimensions: {
-        width: width,
-        height: height,
+        width,
+        height,
         widthCm: (width * 100).toFixed(1),
         heightCm: (height * 100).toFixed(1),
         areaCmSq: (width * height * 10000).toFixed(0)
@@ -479,8 +427,9 @@ AFRAME.registerComponent('object-definition', {
       object: objectData
     });
     
-    // Reset state for next object
-    this.setState(STATES.IDLE);
+    // Reset for next object
+    this.reset();
+    this.step = 0;
   },
   
   // Reset state and clean up
@@ -489,14 +438,23 @@ AFRAME.registerComponent('object-definition', {
     removeMarkers(this.markers);
     this.markers = [];
     
-    // Remove visualization
+    // Remove visualization entity and all its children (lines, plane, dimension texts)
     if (this.visualObject && this.visualObject.parentNode) {
+      // This removes all child elements including dimension texts
       this.visualObject.parentNode.removeChild(this.visualObject);
     }
     this.visualObject = null;
     
     // Reset state
     this.points = [];
+    
+    // Also check for any orphaned text elements with specific classes
+    const texts = document.querySelectorAll('.dimension-text, .area-text');
+    texts.forEach(text => {
+      if (text.parentNode) {
+        text.parentNode.removeChild(text);
+      }
+    });
     
     console.log('Object Definition: Reset complete');
   },
@@ -517,11 +475,43 @@ AFRAME.registerComponent('object-definition', {
     
     // Emit object deleted event
     emitEvent(this.el, EVENTS.OBJECT.DELETED, {
-      objectId: objectId
+      objectId
     });
     
     // Emit status update
     this.emitStatus('deleted', 'Object deleted');
+  },
+  
+  // Toggle visibility of an object by ID
+  toggleObjectVisibility: function(objectId) {
+    if (!objectId) return;
+    
+    // Find the object
+    const objectIndex = this.objects.findIndex(obj => obj.id === objectId);
+    if (objectIndex === -1) return;
+    
+    // Toggle visibility
+    this.objects[objectIndex].visible = !this.objects[objectIndex].visible;
+    
+    console.log(`Object Definition: ${this.objects[objectIndex].visible ? 'Showing' : 'Hiding'} object ${objectId}`);
+    
+    // Find and update the visual representation if it exists in the scene
+    const objectVisual = document.getElementById(`visual-${objectId}`);
+    if (objectVisual) {
+      objectVisual.setAttribute('visible', this.objects[objectIndex].visible);
+    }
+    
+    // Update scene state
+    if (this.sceneState) {
+      this.sceneState.updateState('objects', this.objects);
+    }
+    
+    // Emit status update
+    const visibilityStatus = this.objects[objectIndex].visible ? 'shown' : 'hidden';
+    this.emitStatus('visibility-toggle', `Object ${visibilityStatus}`, {
+      objectId,
+      visible: this.objects[objectIndex].visible
+    });
   },
   
   // Set visibility of the component
@@ -534,7 +524,8 @@ AFRAME.registerComponent('object-definition', {
     if (oldData.active !== this.data.active) {
       // Reset when deactivated
       if (!this.data.active) {
-        this.setState(STATES.IDLE);
+        this.reset();
+        this.step = 0;
       }
       
       // Update visibility based on active state

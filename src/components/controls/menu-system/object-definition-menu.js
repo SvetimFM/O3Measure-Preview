@@ -65,8 +65,11 @@ ObjectDefinitionMenu.render = function() {
   // Add object definition controls
   this.createObjectButtons();
   
-  // Add reset button
-  this.createResetButton();
+  // Initially don't create the reset button - we'll add it only when needed
+  // Store a reference to the container for later button creation
+  this.resetButtonContainer = document.createElement('a-entity');
+  this.resetButtonContainer.setAttribute('position', '0 -0.03 0');
+  this.container.appendChild(this.resetButtonContainer);
   
   // Set up event listeners for object status updates
   this.setupStatusListener();
@@ -120,7 +123,10 @@ ObjectDefinitionMenu.createObjectButtons = function() {
 
 // Create a reset button to clear current object definition
 ObjectDefinitionMenu.createResetButton = function() {
-  const { height } = this.data;
+  // Only create the button if it doesn't already exist
+  if (document.getElementById('object-reset-button')) {
+    return document.getElementById('object-reset-button');
+  }
   
   // Add a reset button that clears current object
   const resetBtn = this.createButton({
@@ -128,35 +134,34 @@ ObjectDefinitionMenu.createResetButton = function() {
     width: 0.06,
     height: 0.03,
     color: '#F4B400', // Yellow/orange warning color
-    position: '0 -0.03 0', 
-    handler: () => this.handleResetButton()
+    position: '0 0 0', // Position is relative to parent
+    handler: () => this.handleResetButton(),
+    id: 'object-reset-button'
   });
-  this.container.appendChild(resetBtn);
+  
+  // Add to the designated container
+  this.resetButtonContainer.appendChild(resetBtn);
+  
+  return resetBtn;
 };
 
 // Handle reset button - clear current object
 ObjectDefinitionMenu.handleResetButton = function() {
   console.log('Object Definition Menu: Reset current object');
   
-  // Emit reset event - this will only reset the current point selection
+  // Emit reset event - this will only reset the current point selection without exiting object creation mode
   emitEvent(this.sceneEl, EVENTS.OBJECT.ACTION, { action: 'reset-current-object' });
   
-  // Update status text
+  // Update status text to indicate we're still in object creation mode
   const statusElement = document.getElementById('object-status');
   if (statusElement) {
-    statusElement.setAttribute('value', 'Object definition reset. Press Start to begin.');
+    statusElement.setAttribute('value', 'Object reset. Place the first corner point (top left).');
   }
   
-  // Update the start button to show Start state
-  const startButton = document.getElementById('object-start-button');
-  if (startButton) {
-    startButton.setAttribute('button', {
-      label: 'Start', // Reset to initial state
-      color: Colors.PRIMARY 
-    });
-  }
+  // Do NOT change the start button back to "Start" - keep it as "Complete"
+  // This way we stay in object creation mode
   
-  // Update instructions to default state
+  // Update instructions text
   const instructionsElement = document.getElementById('object-instructions');
   if (instructionsElement) {
     instructionsElement.setAttribute('value', 'Define an object by placing three corner points');
@@ -180,6 +185,9 @@ ObjectDefinitionMenu.handleStartButton = function() {
       label: 'Complete',
       color: '#0F9D58' // Green
     });
+    
+    // Create the reset button now that we're in object creation mode
+    this.createResetButton();
   } else if (currentLabel === 'Complete') {
     // Emit complete object definition event
     emitEvent(this.sceneEl, EVENTS.OBJECT.ACTION, { action: 'complete-object-definition' });
@@ -189,6 +197,12 @@ ObjectDefinitionMenu.handleStartButton = function() {
       label: 'Start',
       color: '#4285F4' // Blue
     });
+    
+    // Remove the reset button completely from the DOM
+    const resetButton = document.getElementById('object-reset-button');
+    if (resetButton && resetButton.parentNode) {
+      resetButton.parentNode.removeChild(resetButton);
+    }
   }
 };
 
@@ -200,6 +214,12 @@ ObjectDefinitionMenu.handleCancelButton = function() {
     label: 'Start',
     color: '#4285F4' // Blue
   });
+  
+  // Remove the reset button completely from the DOM
+  const resetButton = document.getElementById('object-reset-button');
+  if (resetButton && resetButton.parentNode) {
+    resetButton.parentNode.removeChild(resetButton);
+  }
   
   // Emit cancel object definition event
   emitEvent(this.sceneEl, EVENTS.OBJECT.ACTION, { action: 'cancel-object-definition' });
@@ -241,6 +261,12 @@ ObjectDefinitionMenu.onObjectStatus = function(event) {
       color: '#4285F4' // Blue
     });
     
+    // Remove the reset button completely from the DOM
+    const resetButton = document.getElementById('object-reset-button');
+    if (resetButton && resetButton.parentNode) {
+      resetButton.parentNode.removeChild(resetButton);
+    }
+    
     // If we have dimensions, display them
     if (dimensions) {
       const instructionsElement = document.getElementById('object-instructions');
@@ -253,6 +279,12 @@ ObjectDefinitionMenu.onObjectStatus = function(event) {
     
     // Update the objects list in the side panel
     this.updateObjectList();
+  } else if (status === 'cancelled') {
+    // Remove the reset button completely from the DOM
+    const resetButton = document.getElementById('object-reset-button');
+    if (resetButton && resetButton.parentNode) {
+      resetButton.parentNode.removeChild(resetButton);
+    }
   }
 };
 
@@ -348,9 +380,28 @@ ObjectDefinitionMenu.updateObjectList = function() {
     objectText.setAttribute('value', `${index + 1}. ${dimensions}`);
     objectText.setAttribute('align', 'left');
     objectText.setAttribute('position', '-0.11 0 0');
-    objectText.setAttribute('color', '#FFFFFF');
+    objectText.setAttribute('color', object.visible ? '#FFFFFF' : '#888888'); // Dim text if hidden
     objectText.setAttribute('scale', '0.035 0.035 0.035');
     rowContainer.appendChild(objectText);
+    
+    // Visibility toggle button
+    const visibilityBtn = this.createElement('a-entity');
+    visibilityBtn.setAttribute('button', {
+      label: object.visible ? '👁️' : '🚫',
+      width: 0.035,
+      height: 0.035,
+      color: object.visible ? '#4285F4' : '#888888', // Blue when visible, gray when hidden
+      textColor: '#FFFFFF'
+    });
+    visibilityBtn.setAttribute('position', '0.05 0 0');
+    visibilityBtn.setAttribute('data-object-id', object.id);
+    
+    // Add event listener for visibility toggle
+    visibilityBtn.addEventListener('button-press-ended', () => {
+      console.log('Visibility toggle pressed for object:', object.id);
+      this.toggleObjectVisibility(object.id);
+    });
+    rowContainer.appendChild(visibilityBtn);
     
     // Delete button using the button component
     const deleteBtn = this.createElement('a-entity');
@@ -389,6 +440,20 @@ ObjectDefinitionMenu.deleteObject = function(objectId) {
   });
   
   // Update list
+  this.updateObjectList();
+};
+
+// Toggle object visibility
+ObjectDefinitionMenu.toggleObjectVisibility = function(objectId) {
+  console.log('Object Definition Menu: Toggling visibility for object', objectId);
+  
+  // Emit toggle visibility event
+  emitEvent(this.sceneEl, EVENTS.OBJECT.ACTION, { 
+    action: 'toggle-object-visibility',
+    objectId: objectId
+  });
+  
+  // Update list to reflect new visibility state
   this.updateObjectList();
 };
 
