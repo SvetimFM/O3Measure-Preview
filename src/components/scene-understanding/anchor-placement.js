@@ -50,12 +50,13 @@ AFRAME.registerComponent('anchor-placement', {
   // Primary event handler for anchor actions
   onAnchorAction: function(event) {
     const action = event.detail.action;
+    const objectId = event.detail.objectId; // Always get objectId from event
     
-    console.log('Anchor Placement: Action received -', action);
+    console.log('Anchor Placement: Action received -', action, 'for objectId:', objectId);
     
     switch(action) {
       case 'start-anchor-placement':
-        this.startAnchorPlacement(event.detail.objectId);
+        this.startAnchorPlacement(objectId);
         break;
         
       case 'set-anchor-count':
@@ -63,7 +64,7 @@ AFRAME.registerComponent('anchor-placement', {
         break;
         
       case 'auto-place-anchors':
-        this.autoPlaceAnchors();
+        this.autoPlaceAnchors(objectId); // Pass objectId explicitly
         break;
         
       case 'reset-anchors':
@@ -73,7 +74,7 @@ AFRAME.registerComponent('anchor-placement', {
         break;
         
       case 'complete-anchor-placement':
-        this.completeAnchorPlacement();
+        this.completeAnchorPlacement(objectId); // Pass objectId explicitly
         break;
         
       case 'cancel-anchor-placement':
@@ -96,15 +97,24 @@ AFRAME.registerComponent('anchor-placement', {
     
     // If objectId is provided, use it
     if (objectId) {
+      // Get object data from scene state
       if (this.sceneState) {
         const objects = this.sceneState.getState('objects') || [];
-        this.currentObject = objects.find(obj => obj.id === objectId);
+        const objectData = objects.find(obj => obj.id === objectId);
         
-        if (this.currentObject) {
+        if (objectData) {
+          // Store current object temporarily (will be passed back in events)
+          this.currentObject = objectData;
+          
+          // Set component data
           this.data.objectId = objectId;
           this.data.active = true;
+          
+          // Set component state
           this.step = 2; // Placing anchors state
-          this.emitStatus('in-progress', `Pinch to place ${this.data.anchorCount} anchors on the object`);
+          this.emitStatus('in-progress', `Pinch to place ${this.data.anchorCount} anchors on the object`, {
+            objectId: objectId
+          });
           this.toggleHandReticles(true);
           return;
         }
@@ -119,20 +129,36 @@ AFRAME.registerComponent('anchor-placement', {
   
   /**
    * Auto-place anchors on the current object using default positions
+   * @param {String} objectId - ID of the object to place anchors on
    */
-  autoPlaceAnchors: function() {
-    console.log('Anchor Placement: Auto-placing anchors');
+  autoPlaceAnchors: function(objectId) {
+    console.log('Anchor Placement: Auto-placing anchors for object:', objectId);
     
     // Clear existing anchors first
     this.reset();
     
-    if (!this.currentObject) {
-      console.warn('Anchor Placement: No object selected for auto-placement');
+    if (!objectId) {
+      console.warn('Anchor Placement: No objectId provided for auto-placement');
       return;
     }
     
+    // Get the object data from scene state
+    let objectData = null;
+    if (this.sceneState) {
+      const objects = this.sceneState.getState('objects') || [];
+      objectData = objects.find(obj => obj.id === objectId);
+    }
+    
+    if (!objectData) {
+      console.warn('Anchor Placement: Object data not found for objectId:', objectId);
+      return;
+    }
+    
+    // Store current object for reference
+    this.currentObject = objectData;
+    
     // Find the object entity in the scene
-    const objectEntity = document.getElementById(this.currentObject.id);
+    const objectEntity = document.getElementById(objectId);
     if (!objectEntity) {
       console.error('Anchor Placement: Object entity not found in scene for auto-placement');
       return;
@@ -147,8 +173,8 @@ AFRAME.registerComponent('anchor-placement', {
     
     // Get default anchor positions for the current anchor count (0-1 range)
     const defaultPositions = this.getDefaultAnchorPositions(this.data.anchorCount);
-    const width = this.currentObject.width;
-    const height = this.currentObject.height;
+    const width = objectData.width;
+    const height = objectData.height;
     
     // Create anchors at default positions
     defaultPositions.forEach((pos, index) => {
@@ -174,7 +200,7 @@ AFRAME.registerComponent('anchor-placement', {
       // Store anchor data
       this.anchors.push({
         id: `anchor_${Date.now()}_${index}`,
-        objectId: this.currentObject.id,
+        objectId: objectId,
         position: {
           x: localX,
           y: localY,
@@ -250,9 +276,10 @@ AFRAME.registerComponent('anchor-placement', {
   
   /**
    * Complete anchor placement and save to object
+   * @param {String} objectId - ID of the object to save anchors for
    */
-  completeAnchorPlacement: function() {
-    console.log('Anchor Placement: Completing anchor placement');
+  completeAnchorPlacement: function(objectId) {
+    console.log('Anchor Placement: Completing anchor placement for object:', objectId);
     
     // Only complete if we have at least one anchor
     if (this.anchors.length === 0) {
@@ -268,41 +295,36 @@ AFRAME.registerComponent('anchor-placement', {
       return;
     }
     
-    if (!this.currentObject) {
-      console.error('Anchor Placement: No object selected for finalizing anchors');
+    if (!objectId) {
+      console.error('Anchor Placement: No object ID provided for finalizing anchors');
       return;
     }
     
-    // Update the object in state with anchors
-    if (this.sceneState) {
-      const objects = this.sceneState.getState('objects') || [];
-      const objectIndex = objects.findIndex(obj => obj.id === this.currentObject.id);
-      
-      if (objectIndex >= 0) {
-        // Update object with anchors
-        objects[objectIndex].anchors = this.anchors;
-        
-        // Update state
-        this.sceneState.updateState('objects', objects);
-        
-        // Emit anchors completed event
-        this.el.sceneEl.emit('anchor-completed', {
-          objectId: this.currentObject.id,
-          anchors: this.anchors
-        });
-        
-        // Emit status update
-        this.emitStatus('completed', 'Anchors saved successfully', {
-          objectId: this.currentObject.id,
-          anchorCount: this.anchors.length
-        });
-        
-        // Reset state
-        this.reset();
-        this.step = 0; // Back to idle
-        this.toggleHandReticles(false);
+    // Verify that all anchors are for the same object
+    for (let anchor of this.anchors) {
+      if (anchor.objectId !== objectId) {
+        console.warn('Anchor Placement: Anchor objectId mismatch, fixing:', anchor.objectId, 'to', objectId);
+        anchor.objectId = objectId;
       }
     }
+    
+    // Instead of directly updating the state, emit an event with the anchor data
+    // This keeps the component stateless - the event listener can handle state updates
+    this.el.sceneEl.emit('anchor-completed', {
+      objectId: objectId,
+      anchors: this.anchors.slice() // Send a copy of the anchor data
+    });
+    
+    // Emit status update
+    this.emitStatus('completed', 'Anchors saved successfully', {
+      objectId: objectId,
+      anchorCount: this.anchors.length
+    });
+    
+    // Reset state
+    this.reset();
+    this.step = 0; // Back to idle
+    this.toggleHandReticles(false);
   },
   
   /**
@@ -525,12 +547,16 @@ AFRAME.registerComponent('anchor-placement', {
    * @param {Object} additionalData - Extra data to include
    */
   emitStatus: function(status, message, additionalData = {}) {
-    this.el.sceneEl.emit('anchor-status', {
+    // Always include objectId if available
+    const data = {
       status: status,
       message: message,
       anchorCount: this.data.anchorCount,
+      objectId: this.data.objectId || null,
       ...additionalData
-    });
+    };
+    
+    this.el.sceneEl.emit('anchor-status', data);
   },
   
   /**

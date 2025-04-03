@@ -18,6 +18,7 @@ import './wall-calibration-menu.js';
 import './wall-adjustment-menu.js';
 import './wall-point-selection-menu.js';
 import './object-definition-menu.js';
+import './anchor-placement-menu.js';
 
 // Export for use by the menu manager
 export { MenuRegistry, BaseMenu };

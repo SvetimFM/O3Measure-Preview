@@ -408,6 +408,7 @@ AFRAME.registerComponent('object-definition', {
     // Update scene state if available
     if (this.sceneState) {
       this.sceneState.updateState('objects', this.objects);
+      this.sceneState.updateState('currentObjectId', objectId);
     }
     
     // Emit object created event
@@ -517,6 +518,16 @@ AFRAME.registerComponent('object-definition', {
   // Set visibility of the component
   setVisibility: function(visible) {
     this.el.setAttribute('visible', visible);
+  },
+  
+  // Get the temporary object ID for the current object being defined
+  getCurrentTempObjectId: function() {
+    // If we have points but haven't finalized yet, generate a temporary ID
+    if (this.points.length > 0 && this.step > 0) {
+      // Create a temporary ID based on timestamp to uniquely identify this in-progress object
+      return `temp_object_${Date.now()}`; 
+    }
+    return null;
   },
   
   update: function(oldData) {

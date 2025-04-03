@@ -135,29 +135,48 @@ AFRAME.registerComponent('menu-manager', {
   
   onMenuAction: function(event) {
     const action = event.detail.action;
+    const params = {};
     
-    console.log('Menu Manager: Menu action received -', action);
+    // Extract any parameters from the event
+    for (const key in event.detail) {
+      if (key !== 'action' && key !== 'menu') {
+        params[key] = event.detail[key];
+      }
+    }
+    
+    console.log('Menu Manager: Menu action received -', action, 'with params:', params);
     
     // Handle navigation between menus
     switch(action) {
       case 'wall-calibration':
         // Push current menu to stack for back navigation
-        this.pushMenu('wall-calibration');
+        this.pushMenu('wall-calibration', params);
         break;
         
       case 'reset-wall-calibration':
         // Push current menu to stack for back navigation
-        this.pushMenu('wall-point-selection');
+        this.pushMenu('wall-point-selection', params);
         break;
         
       case 'adjust-wall':
         // Push current menu to stack for back navigation
-        this.pushMenu('wall-adjustment');
+        this.pushMenu('wall-adjustment', params);
         break;
         
       case 'object-definition':
         // Push current menu to stack for back navigation
-        this.pushMenu('object-definition');
+        this.pushMenu('object-definition', params);
+        break;
+        
+      case 'anchor-placement':
+        // Navigate to anchor placement menu with parameters
+        this.pushMenu('anchor-placement', params);
+        break;
+        
+      case 'anchor-placement-completed':
+      case 'back-to-object-definition':
+        // Return to object definition menu with parameters
+        this.showMenu('object-definition', params);
         break;
         
       case 'view-objects':
@@ -178,12 +197,12 @@ AFRAME.registerComponent('menu-manager', {
     }
   },
   
-  pushMenu: function(menuId) {
+  pushMenu: function(menuId, params = {}) {
     // Add current menu to stack and show the new one
     if (this.currentMenu) {
       this.menuStack.push(this.currentMenu);
     }
-    this.showMenu(menuId);
+    this.showMenu(menuId, params);
   },
   
   popMenu: function() {
@@ -197,8 +216,8 @@ AFRAME.registerComponent('menu-manager', {
     }
   },
   
-  showMenu: function(menuId) {
-    console.log('Menu Manager: Showing menu -', menuId);
+  showMenu: function(menuId, params = {}) {
+    console.log('Menu Manager: Showing menu -', menuId, 'with params:', params);
     
     // Check if menu exists in registry
     if (!MenuRegistry.hasMenu(menuId)) {
@@ -212,9 +231,15 @@ AFRAME.registerComponent('menu-manager', {
     // Get menu from registry
     const menuDefinition = MenuRegistry.getMenu(menuId);
     
+    // Add parameters to data
+    const menuData = {
+      ...this.data,
+      params: params
+    };
+    
     // Initialize the menu with our container and data
     const menu = Object.create(menuDefinition);
-    menu.init(this.contentContainer, this.data, this.el.sceneEl);
+    menu.init(this.contentContainer, menuData, this.el.sceneEl);
     
     // Render the menu
     menu.render();

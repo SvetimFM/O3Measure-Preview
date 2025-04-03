@@ -31,7 +31,8 @@ AFRAME.registerSystem('scene-state', {
           adjustmentFactor: 0.01 // How much to move per adjustment (in meters)
         }
       },
-      objects: [] // Array for storing defined objects
+      objects: [], // Array for storing defined objects
+      currentObjectId: null // Track the currently selected object
     };
     
     // Setup event listeners
@@ -43,6 +44,35 @@ AFRAME.registerSystem('scene-state', {
   setupEventListeners: function() {
     this.el.addEventListener(EVENTS.STATE.UPDATE, this.onStateUpdate.bind(this));
     this.el.addEventListener(EVENTS.WALL.ACTION, this.onWallCalibrationAction.bind(this));
+    this.el.addEventListener('anchor-completed', this.onAnchorCompleted.bind(this));
+  },
+  
+  // Handle anchor completion event
+  onAnchorCompleted: function(event) {
+    const { objectId, anchors } = event.detail;
+    
+    if (!objectId || !anchors || !Array.isArray(anchors) || anchors.length === 0) {
+      console.error('Scene State: Invalid anchor completion data:', event.detail);
+      return;
+    }
+    
+    console.log(`Scene State: Saving ${anchors.length} anchors for object ${objectId}`);
+    
+    // Update the object in state with anchors
+    const objects = this.getState('objects') || [];
+    const objectIndex = objects.findIndex(obj => obj.id === objectId);
+    
+    if (objectIndex >= 0) {
+      // Update object with anchors
+      objects[objectIndex].anchors = anchors;
+      
+      // Update state
+      this.updateState('objects', objects);
+      
+      console.log('Scene State: Object anchors updated successfully');
+    } else {
+      console.error('Scene State: Object not found for anchor update:', objectId);
+    }
   },
   
   // Get state or substate

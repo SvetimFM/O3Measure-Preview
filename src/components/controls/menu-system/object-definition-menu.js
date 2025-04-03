@@ -80,19 +80,30 @@ ObjectDefinitionMenu.render = function() {
 
 // Create object definition buttons
 ObjectDefinitionMenu.createObjectButtons = function() {
-  const { height } = this.data;
+  const { width, height } = this.data;
   
   // Calculate starting Y position based on panel height
   const startY = height/2 - 0.07;
   const spacing = 0.035;
   
+  // Add back button at top left corner
+  const backBtn = this.createButton({
+    label: '\u2190',  // Left arrow unicode escape
+    color: '#999999',
+    position: `${-width/2 + 0.025} ${height/2 - 0.025} 0`,
+    width: 0.04,
+    height: 0.04,
+    handler: () => this.handleBackButton()
+  });
+  this.container.appendChild(backBtn);
+  
   // Button config for start/create button
   const startBtn = this.createButton({
     label: 'Start',
-    width: 0.07,
+    width: 0.08, // Slightly wider to accommodate "Save & Exit" text
     height: 0.04,
     color: '#4285F4',
-    position: '-0.07 -0.03 0',
+    position: '-0.08 -0.03 0',
     id: 'object-start-button',
     handler: () => this.handleStartButton()
   });
@@ -101,24 +112,13 @@ ObjectDefinitionMenu.createObjectButtons = function() {
   // Add cancel button
   const cancelBtn = this.createButton({
     label: 'Cancel',
-    width: 0.07,
+    width: 0.08,
     height: 0.04,
     color: '#DB4437',
-    position: '0.07 -0.03 0',
+    position: '0.08 -0.03 0',
     handler: () => this.handleCancelButton()
   });
   this.container.appendChild(cancelBtn);
-  
-  // Add back button
-  const backBtn = this.createButton({
-    label: 'Back to Main Menu',
-    color: '#999999',
-    position: `0 ${-height/2 + 0.03} 0`,
-    width: 0.12,
-    height: 0.03,
-    handler: () => this.handleBackButton()
-  });
-  this.container.appendChild(backBtn);
 };
 
 // Create a reset button to clear current object definition
@@ -131,7 +131,7 @@ ObjectDefinitionMenu.createResetButton = function() {
   // Add a reset button that clears current object
   const resetBtn = this.createButton({
     label: 'Reset',
-    width: 0.06,
+    width: 0.05,
     height: 0.03,
     color: '#F4B400', // Yellow/orange warning color
     position: '0 0 0', // Position is relative to parent
@@ -158,8 +158,18 @@ ObjectDefinitionMenu.handleResetButton = function() {
     statusElement.setAttribute('value', 'Object reset. Place the first corner point (top left).');
   }
   
-  // Do NOT change the start button back to "Start" - keep it as "Complete"
-  // This way we stay in object creation mode
+  // Also reset the Save & Exit button to disabled
+  const startButton = document.getElementById('object-start-button');
+  if (startButton) {
+    startButton.setAttribute('button', {
+      label: 'Save & Exit',
+      color: '#888888', // Grey (disabled initially)
+      enabled: false
+    });
+  }
+  
+  // Remove the anchor placement button as we're back to zero points
+  this.removeAnchorPlacementButton();
   
   // Update instructions text
   const instructionsElement = document.getElementById('object-instructions');
@@ -171,31 +181,109 @@ ObjectDefinitionMenu.handleResetButton = function() {
   this.updateObjectList();
 };
 
+// Create a wide anchor placement button
+ObjectDefinitionMenu.createAnchorPlacementButton = function() {
+  // Only create the button if it doesn't already exist
+  if (document.getElementById('anchor-placement-button')) {
+    return document.getElementById('anchor-placement-button');
+  }
+  
+  // Add a wide anchor placement button
+  const anchorBtn = this.createButton({
+    label: 'Continue to Anchor Placement',
+    width: 0.2, // Wider button - increased from 0.16
+    height: 0.03, // Slightly shorter
+    color: '#4285F4', // Primary blue color
+    position: '0 -0.08 0', // Position slightly lower
+    handler: () => this.handleAnchorPlacementButton(),
+    id: 'anchor-placement-button'
+  });
+  
+  // Create a container for the button
+  const anchorBtnContainer = document.createElement('a-entity');
+  anchorBtnContainer.setAttribute('id', 'anchor-button-container');
+  anchorBtnContainer.appendChild(anchorBtn);
+  this.container.appendChild(anchorBtnContainer);
+  
+  return anchorBtn;
+};
+
+// Remove the anchor placement button
+ObjectDefinitionMenu.removeAnchorPlacementButton = function() {
+  const anchorBtnContainer = document.getElementById('anchor-button-container');
+  if (anchorBtnContainer && anchorBtnContainer.parentNode) {
+    anchorBtnContainer.parentNode.removeChild(anchorBtnContainer);
+  }
+};
+
+// Handle anchor placement button click
+ObjectDefinitionMenu.handleAnchorPlacementButton = function() {
+  console.log('Object Definition Menu: Opening anchor placement');
+  
+  // Get latest object data from the object definition component
+  const objectDef = document.getElementById('objectDefinition');
+  let tempObjectId = null;
+  
+  if (objectDef && objectDef.components['object-definition'] && 
+      typeof objectDef.components['object-definition'].getCurrentTempObjectId === 'function') {
+    // Try to get the temporary object ID for the current object being defined
+    tempObjectId = objectDef.components['object-definition'].getCurrentTempObjectId();
+  }
+  
+  if (!tempObjectId) {
+    // Fallback to the currentObjectId in scene state
+    const sceneState = this.sceneEl.systems['scene-state'];
+    tempObjectId = sceneState ? sceneState.getState('currentObjectId') : null;
+  }
+  
+  console.log('Object Definition Menu: Using object ID for anchors:', tempObjectId);
+  
+  // Navigate to anchor placement menu
+  emitEvent(this.sceneEl, EVENTS.ANCHOR.ACTION, { 
+    action: 'start-anchor-placement',
+    objectId: tempObjectId
+  });
+  
+  // Navigate to anchor placement menu with objectId as parameter
+  this.emitMenuAction('anchor-placement', { objectId: tempObjectId });
+};
+
 // Handle start button click
 ObjectDefinitionMenu.handleStartButton = function() {
   const startButton = document.getElementById('object-start-button');
   const currentLabel = startButton.getAttribute('button').label;
+  const isEnabled = startButton.getAttribute('button').enabled !== false;
   
   if (currentLabel === 'Start') {
+    // Remove any existing anchor placement button
+    this.removeAnchorPlacementButton();
+    
     // Emit start object definition event
     emitEvent(this.sceneEl, EVENTS.OBJECT.ACTION, { action: 'start-object-definition' });
     
-    // Update button to "Complete" for finishing the object
+    // Update button to "Save & Exit" for finishing the object
     startButton.setAttribute('button', {
-      label: 'Complete',
-      color: '#0F9D58' // Green
+      label: 'Save & Exit',
+      color: '#888888', // Grey (disabled initially)
+      enabled: false
     });
     
     // Create the reset button now that we're in object creation mode
     this.createResetButton();
-  } else if (currentLabel === 'Complete') {
+  } else if (currentLabel === 'Save & Exit' && isEnabled) {
+    // Only process if button is enabled (all points set)
+    
     // Emit complete object definition event
     emitEvent(this.sceneEl, EVENTS.OBJECT.ACTION, { action: 'complete-object-definition' });
+    
+    // Remove the anchor placement button after completion
+    this.removeAnchorPlacementButton();
     
     // Reset button back to Start for next object
     startButton.setAttribute('button', {
       label: 'Start',
-      color: '#4285F4' // Blue
+      color: '#4285F4', // Blue
+      enabled: true
     });
     
     // Remove the reset button completely from the DOM
@@ -212,7 +300,8 @@ ObjectDefinitionMenu.handleCancelButton = function() {
   const startButton = document.getElementById('object-start-button');
   startButton.setAttribute('button', {
     label: 'Start',
-    color: '#4285F4' // Blue
+    color: '#4285F4', // Blue
+    enabled: true
   });
   
   // Remove the reset button completely from the DOM
@@ -220,6 +309,9 @@ ObjectDefinitionMenu.handleCancelButton = function() {
   if (resetButton && resetButton.parentNode) {
     resetButton.parentNode.removeChild(resetButton);
   }
+  
+  // Remove the anchor placement button if it exists
+  this.removeAnchorPlacementButton();
   
   // Emit cancel object definition event
   emitEvent(this.sceneEl, EVENTS.OBJECT.ACTION, { action: 'cancel-object-definition' });
@@ -232,6 +324,15 @@ ObjectDefinitionMenu.handleBackButton = function() {
   
   // Return to main menu
   this.emitMenuAction('back-to-main-menu');
+};
+
+// Emit menu action event
+ObjectDefinitionMenu.emitMenuAction = function(action, data = {}) {
+  this.sceneEl.emit('menu-action', {
+    menu: 'object-definition',
+    action: action,
+    ...data
+  });
 };
 
 // Set up listener for object status updates
@@ -253,19 +354,45 @@ ObjectDefinitionMenu.onObjectStatus = function(event) {
     statusElement.setAttribute('value', message);
   }
   
+  // Get the start/complete button
+  const startButton = document.getElementById('object-start-button');
+  
+  // Update button enabled state based on point count
+  if (startButton && startButton.getAttribute('button').label === 'Save & Exit') {
+    // Enable Save & Exit button only when all three points are placed
+    const isComplete = pointCount >= 3;
+    startButton.setAttribute('button', {
+      label: 'Save & Exit',
+      color: isComplete ? '#0F9D58' : '#888888', // Green if complete, grey if not
+      enabled: isComplete
+    });
+    
+    // Show the anchor placement button when object is ready to complete
+    if (isComplete) {
+      this.createAnchorPlacementButton();
+    } else {
+      this.removeAnchorPlacementButton();
+    }
+  }
+  
   // Update button states if needed
   if (status === 'completed') {
-    const startButton = document.getElementById('object-start-button');
-    startButton.setAttribute('button', {
-      label: 'Start',
-      color: '#4285F4' // Blue
-    });
+    if (startButton) {
+      startButton.setAttribute('button', {
+        label: 'Start',
+        color: '#4285F4', // Blue
+        enabled: true
+      });
+    }
     
     // Remove the reset button completely from the DOM
     const resetButton = document.getElementById('object-reset-button');
     if (resetButton && resetButton.parentNode) {
       resetButton.parentNode.removeChild(resetButton);
     }
+    
+    // Remove the anchor placement button after completion
+    this.removeAnchorPlacementButton();
     
     // If we have dimensions, display them
     if (dimensions) {
@@ -280,11 +407,23 @@ ObjectDefinitionMenu.onObjectStatus = function(event) {
     // Update the objects list in the side panel
     this.updateObjectList();
   } else if (status === 'cancelled') {
+    // Clean up all buttons
+    if (startButton) {
+      startButton.setAttribute('button', {
+        label: 'Start',
+        color: '#4285F4', // Blue
+        enabled: true
+      });
+    }
+    
     // Remove the reset button completely from the DOM
     const resetButton = document.getElementById('object-reset-button');
     if (resetButton && resetButton.parentNode) {
       resetButton.parentNode.removeChild(resetButton);
     }
+    
+    // Remove the anchor placement button if it exists
+    this.removeAnchorPlacementButton();
   }
 };
 
@@ -384,10 +523,29 @@ ObjectDefinitionMenu.updateObjectList = function() {
     objectText.setAttribute('scale', '0.035 0.035 0.035');
     rowContainer.appendChild(objectText);
     
+    // Anchor edit button - left of visibility toggle
+    const anchorEditBtn = this.createElement('a-entity');
+    anchorEditBtn.setAttribute('button', {
+      label: '\u2693', // Anchor symbol (U+2693)
+      width: 0.035,
+      height: 0.035,
+      color: '#F4B400', // Yellow/amber color
+      textColor: '#FFFFFF'
+    });
+    anchorEditBtn.setAttribute('position', '0.005 0 0');
+    anchorEditBtn.setAttribute('data-object-id', object.id);
+    
+    // Add event listener for anchor edit button
+    anchorEditBtn.addEventListener('button-press-ended', () => {
+      console.log('Anchor edit button pressed for object:', object.id);
+      this.editObjectAnchors(object.id);
+    });
+    rowContainer.appendChild(anchorEditBtn);
+    
     // Visibility toggle button
     const visibilityBtn = this.createElement('a-entity');
     visibilityBtn.setAttribute('button', {
-      label: object.visible ? '👁️' : '🚫',
+      label: object.visible ? '\ud83d\udc41' : '\ud83d\udeab',  // Eye (U+1F441) or No Entry (U+1F6AB) unicode escapes
       width: 0.035,
       height: 0.035,
       color: object.visible ? '#4285F4' : '#888888', // Blue when visible, gray when hidden
@@ -455,6 +613,35 @@ ObjectDefinitionMenu.toggleObjectVisibility = function(objectId) {
   
   // Update list to reflect new visibility state
   this.updateObjectList();
+};
+
+// Navigate to anchor placement menu for specific object
+ObjectDefinitionMenu.editObjectAnchors = function(objectId) {
+  console.log('Object Definition Menu: Editing anchors for object', objectId);
+  
+  // Get scene state to verify object exists
+  const sceneState = this.sceneEl.systems['scene-state'];
+  if (!sceneState) {
+    console.error('Object Definition Menu: Scene state not available');
+    return;
+  }
+  
+  const objects = sceneState.getState('objects') || [];
+  const object = objects.find(obj => obj.id === objectId);
+  
+  if (!object) {
+    console.error('Object Definition Menu: Object not found for anchor editing:', objectId);
+    return;
+  }
+  
+  // Tell the anchor placement component to start with this object
+  emitEvent(this.sceneEl, EVENTS.ANCHOR.ACTION, { 
+    action: 'start-anchor-placement',
+    objectId: objectId
+  });
+  
+  // Navigate to anchor placement menu
+  this.emitMenuAction('anchor-placement', { objectId: objectId });
 };
 
 // Override cleanup to remove event listeners and deactivate component

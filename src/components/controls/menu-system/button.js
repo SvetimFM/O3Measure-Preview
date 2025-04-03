@@ -18,7 +18,8 @@ AFRAME.registerComponent('button', {
     hoverColor: {type: 'color', default: '#5794F7'},
     pressColor: {type: 'color', default: '#A36736'},
     textColor: {type: 'color', default: '#FFFFFF'},
-    toggleable: {type: 'boolean', default: false}
+    toggleable: {type: 'boolean', default: false},
+    enabled: {type: 'boolean', default: true}
   },
 
   init: function () {
@@ -82,8 +83,8 @@ AFRAME.registerComponent('button', {
   },
   
   onMouseEnter: function() {
-    // Only change color if not pressed
-    if (!this.pressed) {
+    // Only change color if not pressed and button is enabled
+    if (!this.pressed && this.data.enabled) {
       this.buttonBackground.setAttribute('color', this.data.hoverColor);
     }
     console.log(`Button hover: ${this.data.label}`);
@@ -98,15 +99,25 @@ AFRAME.registerComponent('button', {
   },
   
   onPressedStarted: function(evt) {
+    // Only respond if button is enabled
+    if (!this.data.enabled) return;
+    
     // Change button color to pressed state
     this.pressed = true;
     this.updateButtonState();
     
     // Emit event for audio feedback
-    emitEvent(this.el, EVENTS.BUTTON.PRESS_STARTED, {id: this.el.id, label: this.data.label});
+    emitEvent(this.el, EVENTS.BUTTON.PRESS_STARTED, {
+      id: this.el.id, 
+      label: this.data.label,
+      enabled: true
+    });
   },
   
   onPressedEnded: function(evt) {
+    // Only respond if button is enabled and was pressed
+    if (!this.data.enabled || !this.pressed) return;
+    
     this.pressed = false;
     
     // Toggle state if toggleable
@@ -120,7 +131,8 @@ AFRAME.registerComponent('button', {
     emitEvent(this.el, EVENTS.BUTTON.PRESS_ENDED, {
       id: this.el.id, 
       label: this.data.label,
-      toggled: this.toggled
+      toggled: this.toggled,
+      enabled: true
     });
     
     console.log(`Button clicked: ${this.data.label}, toggled: ${this.toggled}`);
@@ -130,7 +142,11 @@ AFRAME.registerComponent('button', {
     // Set the appropriate color based on button state
     var color;
     
-    if (this.pressed) {
+    // If button is disabled, use the color passed in the data
+    // This allows for setting a "disabled" gray color through the API
+    if (!this.data.enabled) {
+      color = this.data.color;
+    } else if (this.pressed) {
       color = this.data.pressColor;
     } else if (this.toggled) {
       color = this.data.hoverColor;
@@ -139,6 +155,9 @@ AFRAME.registerComponent('button', {
     }
     
     this.buttonBackground.setAttribute('color', color);
+    
+    // Visually indicate disabled state
+    this.buttonText.setAttribute('color', this.data.enabled ? this.data.textColor : '#AAAAAA');
   },
   
   update: function(oldData) {

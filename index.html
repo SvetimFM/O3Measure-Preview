@@ -12,8 +12,34 @@
     
     <!-- Include main CSS -->
     <link rel="stylesheet" href="/src/styles/main.css">
+    
+    <!-- Preload emoji font for WebXR -->
+    <style>
+      @font-face {
+        font-family: 'emoji';
+        src: local('Apple Color Emoji'),
+             local('Android Emoji'),
+             local('Segoe UI Emoji'),
+             local('Noto Color Emoji');
+        font-display: swap;
+      }
+      
+      /* Force emoji preloading */
+      .emoji-preload {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+        font-family: 'emoji';
+        opacity: 0;
+      }
+    </style>
   </head>
   <body>
+    <!-- Symbol/character preloader - hidden from view -->
+    <div class="emoji-preload">
+      ← ↑ → ↓ ↔ ↕ ↖ ↗ ↘ ↙ ⬅ ⬆ ➡ ⬇ ⬉ ⬊ ⬋ ⬌ ⬍ ⭐ ❗ ✓ ✗ 👁 🚫
+    </div>
+    
     <!-- AR UI overlay -->
     <div id="overlay-ui" class="ui-overlay">
       <!-- Status indicator -->
