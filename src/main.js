@@ -118,6 +118,19 @@ document.addEventListener('DOMContentLoaded', function() {
       scene.appendChild(objectRenderer);
       console.log('Object renderer added to scene');
       
+      // Create anchor placement entity
+      console.log('Creating anchor placement entity');
+      const anchorPlacement = document.createElement('a-entity');
+      anchorPlacement.setAttribute('anchor-placement', {
+        active: false, // Initially inactive
+        objectId: ''
+      });
+      anchorPlacement.setAttribute('id', 'anchorPlacement');
+      
+      // Add anchor placement to scene
+      scene.appendChild(anchorPlacement);
+      console.log('Anchor placement added to scene');
+      
       // We've integrated calibration into the menu manager
       console.log('Calibration functionality is now integrated into the menu manager');
       

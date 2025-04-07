@@ -157,7 +157,8 @@ AnchorPlacementMenu.handleAnchorCountChange = function(count) {
   // Emit direct anchor action event
   this.sceneEl.emit('anchor-action', { 
     action: 'set-anchor-count',
-    count: count
+    count: count,
+    objectId: this.objectId // Always include the objectId
   });
 };
 
@@ -229,9 +230,19 @@ AnchorPlacementMenu.createActionButtons = function() {
 
 // Handle Auto-place button
 AnchorPlacementMenu.handleAutoPlaceAnchors = function() {
+  console.log('Anchor Placement Menu: Auto-place button clicked, emitting event with objectId:', this.objectId);
+  
   // Emit auto-place anchors event directly, including objectId
   this.sceneEl.emit('anchor-action', { 
     action: 'auto-place-anchors',
+    objectId: this.objectId
+  });
+  
+  // DEBUG: Force anchor status update to verify the UI is working
+  this.sceneEl.emit('anchor-status', {
+    status: 'debug',
+    message: 'Auto-place was clicked! If you see this, the UI is working',
+    anchorCount: this.anchorCount,
     objectId: this.objectId
   });
 };
@@ -277,23 +288,40 @@ AnchorPlacementMenu.handleBackButton = function() {
 
 // Handle anchor status updates
 AnchorPlacementMenu.onAnchorStatus = function(event) {
-  const { status, message } = event.detail;
+  const { status, message, anchorCount } = event.detail;
   
-  // Update status text
+  // Update status text if a message is provided
   const statusElement = document.getElementById('anchor-status');
   if (statusElement && message) {
     statusElement.setAttribute('value', message);
   }
   
-  // Update complete button based on status
+  // Update the Complete button state based on anchor count
   const completeBtn = document.getElementById('complete-button');
   if (completeBtn) {
-    // Only enable the complete button when in preview state
-    const isEnabled = status === 'preview';
-    completeBtn.setAttribute('button', {
-      enabled: isEnabled,
-      color: isEnabled ? Colors.PRIMARY : Colors.DISABLED
-    });
+    // Get current button state to preserve other properties
+    const currentButtonState = completeBtn.getAttribute('button');
+    
+    // On reset, explicitly make non-interactable
+    if (status === 'reset') {
+      completeBtn.setAttribute('button', {
+        ...currentButtonState,
+        enabled: false,
+        color: Colors.DISABLED
+      });
+      console.log('Anchor UI: Reset received - Save & Exit button explicitly disabled');
+    } else {
+      // Simple rule: Button is enabled only when we have the right number of anchors placed
+      const hasCorrectAnchorCount = anchorCount === this.anchorCount;
+      
+      completeBtn.setAttribute('button', {
+        ...currentButtonState,
+        enabled: hasCorrectAnchorCount,
+        color: hasCorrectAnchorCount ? Colors.PRIMARY : Colors.DISABLED
+      });
+      
+      console.log(`Anchor UI: Save & Exit button ${hasCorrectAnchorCount ? 'enabled' : 'disabled'}, anchorCount=${anchorCount}, required=${this.anchorCount}`);
+    }
   }
 };
 

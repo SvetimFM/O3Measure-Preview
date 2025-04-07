@@ -11,6 +11,7 @@ import './controls/menu-system/index.js';
 import './scene-understanding/wall-plane.js';
 import './scene-understanding/object-definition.js';
 import './scene-understanding/object-renderer.js';
+import './scene-understanding/anchor-placement.js';
 
 // Initialize all components
 console.log('O3Measure components initialized');

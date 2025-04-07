@@ -46,6 +46,7 @@ AFRAME.registerComponent('object-definition', {
     this.markers = [];
     this.visualObject = null;
     this.lastPinchTime = 0;
+    this.preserveForAnchoring = false; // Flag to keep object visible during anchoring transition
     
     // Get scene state system
     this.sceneState = this.el.sceneEl.systems['scene-state'];
@@ -242,6 +243,16 @@ AFRAME.registerComponent('object-definition', {
       'object-visualization'
     );
     
+    // Always make object interactable with raycasters
+    this.visualObject.classList.add('anchoring-enabled');
+    this.visualObject.setAttribute('data-collideable', 'true');
+    this.visualObject.setAttribute('data-object-type', 'visual');
+    
+    // Add a unique identifier if needed for tracking
+    // (We now use permanent object IDs instead of temporary ones)
+    const uniqueVisId = `vis_${Date.now()}`;
+    this.visualObject.setAttribute('data-vis-id', uniqueVisId);
+    
     // Draw lines between points
     const linePoints = [...this.points];
     
@@ -261,6 +272,11 @@ AFRAME.registerComponent('object-definition', {
       
       // Add dimensions text
       this.addDimensionsText();
+    }
+    
+    // Ensure the object is exposed to the scene state for easy access
+    if (this.sceneState) {
+      this.sceneState.updateState('currentVisualization', this.visualObject);
     }
   },
   
@@ -292,6 +308,17 @@ AFRAME.registerComponent('object-definition', {
     objectPlane.setAttribute('color', '#42D544');
     objectPlane.setAttribute('opacity', 0.2);
     objectPlane.setAttribute('side', 'double');
+    
+    // Always make the plane interactive for raycasters and anchors
+    objectPlane.classList.add('anchoring-enabled');
+    objectPlane.setAttribute('data-collideable', 'true');
+    objectPlane.setAttribute('data-object-type', 'plane');
+    
+    // Add the same vis-id as the parent visualization for consistent identification
+    if (this.visualObject.hasAttribute('data-vis-id')) {
+      const visId = this.visualObject.getAttribute('data-vis-id');
+      objectPlane.setAttribute('data-vis-id', visId);
+    }
     
     this.visualObject.appendChild(objectPlane);
   },
@@ -400,6 +427,23 @@ AFRAME.registerComponent('object-definition', {
     // If we keep the visualization, give it an ID tied to the object
     if (this.visualObject) {
       this.visualObject.setAttribute('id', `visual-${objectId}`);
+      
+      // Use data-id as the universal identifier for all objects
+      this.visualObject.setAttribute('data-id', objectId);
+      
+      // Mark the object as collideable for raycasters
+      this.visualObject.classList.add('anchoring-enabled');
+      this.visualObject.setAttribute('data-collideable', 'true');
+      
+      // Also mark all planes inside the object as collideable
+      const planes = this.visualObject.querySelectorAll('a-plane');
+      planes.forEach(plane => {
+        plane.classList.add('anchoring-enabled');
+        plane.setAttribute('data-collideable', 'true');
+        plane.setAttribute('data-id', objectId);
+      });
+      
+      console.log(`Object ${objectId} marked as collideable with ${planes.length} planes`);
     }
     
     // Add to objects array
@@ -520,32 +564,36 @@ AFRAME.registerComponent('object-definition', {
     this.el.setAttribute('visible', visible);
   },
   
-  // Get the temporary object ID for the current object being defined
-  getCurrentTempObjectId: function() {
-    // If we have points but haven't finalized yet, generate a temporary ID
-    if (this.points.length > 0 && this.step > 0) {
-      // Create a temporary ID based on timestamp to uniquely identify this in-progress object
-      return `temp_object_${Date.now()}`; 
-    }
-    return null;
-  },
+  // This method has been completely removed - we now always save objects before anchor placement
   
   update: function(oldData) {
     // Handle changes to component properties
     if (oldData.active !== this.data.active) {
-      // Reset when deactivated
-      if (!this.data.active) {
+      // Reset when deactivated, but only if not preserving for anchoring
+      if (!this.data.active && !this.preserveForAnchoring) {
         this.reset();
         this.step = 0;
+      } else if (!this.data.active && this.preserveForAnchoring) {
+        console.log('Object Definition: Preserving object for anchoring');
+        // Don't reset, just keep everything as is for anchoring
       }
       
-      // Update visibility based on active state
-      this.setVisibility(this.data.visible && this.data.active);
+      // If we're transitioning to active and preserving for anchoring, keep object visible
+      if (this.data.active && this.preserveForAnchoring) {
+        this.setVisibility(true);
+      } else {
+        // Update visibility based on active state
+        this.setVisibility(this.data.visible && this.data.active);
+      }
     }
     
     if (oldData.visible !== this.data.visible) {
-      // Update visibility
-      this.setVisibility(this.data.visible && this.data.active);
+      // Update visibility, but respect preserveForAnchoring flag
+      if (this.preserveForAnchoring) {
+        this.setVisibility(true);
+      } else {
+        this.setVisibility(this.data.visible && this.data.active);
+      }
     }
   },
   

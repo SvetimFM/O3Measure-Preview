@@ -147,9 +147,12 @@ function calculateRectangleOrientation(p1, p2, p3) {
   // Create a rotation matrix from these basis vectors
   const rotMatrix = new THREE.Matrix4().makeBasis(rightVector, upVector, forwardVector);
   const quaternion = new THREE.Quaternion().setFromRotationMatrix(rotMatrix);
-  const euler = new THREE.Euler().setFromQuaternion(quaternion);
+  
+  // Create Euler angles with explicit 'ZYX' order to better handle rotation around Z axis
+  const euler = new THREE.Euler().setFromQuaternion(quaternion, 'ZYX');
   
   // Convert to degrees for A-Frame
+  // A-Frame expects rotation in degrees for its attribute API
   return {
     x: THREE.MathUtils.radToDeg(euler.x),
     y: THREE.MathUtils.radToDeg(euler.y),

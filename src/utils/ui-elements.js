@@ -206,10 +206,11 @@ function createPlane(attributes = {}, parent = null) {
  * Create and manage a visualization entity with cleanup support
  * @param {HTMLElement} oldVisual - Existing visualization to clean up (if any)
  * @param {HTMLElement} parent - Parent element to attach visualization to
+ * @param {String} id - ID for the visualization entity
  * @param {String} className - Class name for the visualization
  * @returns {HTMLElement} The new visualization entity
  */
-function createVisualizationEntity(oldVisual, parent, className = 'visualization') {
+function createVisualizationEntity(oldVisual, parent, id = 'object-visualization', className = 'visualization') {
   // Clean up old visualization if it exists
   if (oldVisual && oldVisual.parentNode) {
     oldVisual.parentNode.removeChild(oldVisual);
@@ -217,7 +218,12 @@ function createVisualizationEntity(oldVisual, parent, className = 'visualization
   
   // Create container for new visualization
   const visualization = document.createElement('a-entity');
-  visualization.setAttribute('class', className);
+  visualization.setAttribute('class', `${className} anchoring-enabled`);
+  visualization.setAttribute('id', id);
+  
+  // Only objects will be marked collideable when needed
+  visualization.setAttribute('data-collideable', 'false');
+  visualization.setAttribute('data-object-type', 'visualization');
   
   // Add to parent if provided
   if (parent) {

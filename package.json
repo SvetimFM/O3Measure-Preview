@@ -7,11 +7,20 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "dev-host": "vite --host"
+    "dev-host": "vite --host",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:utils": "node --experimental-vm-modules tests/run-tests.js utils",
+    "test:components": "node --experimental-vm-modules tests/run-tests.js components",
+    "test:state": "node --experimental-vm-modules tests/run-tests.js state",
+    "test:webxr": "node --experimental-vm-modules tests/run-tests.js webxr"
   },
   "devDependencies": {
+    "jsdom": "^23.0.1",
     "vite": "^6.0.5",
-    "vite-plugin-mkcert": "^1.17.6"
+    "vite-plugin-mkcert": "^1.17.6",
+    "vitest": "^1.6.1"
   },
   "dependencies": {
     "aframe": "^1.7.0",

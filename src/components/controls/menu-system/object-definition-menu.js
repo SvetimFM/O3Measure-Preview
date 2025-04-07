@@ -220,32 +220,34 @@ ObjectDefinitionMenu.removeAnchorPlacementButton = function() {
 ObjectDefinitionMenu.handleAnchorPlacementButton = function() {
   console.log('Object Definition Menu: Opening anchor placement');
   
-  // Get latest object data from the object definition component
+  // First, save the current object to make it permanent
+  emitEvent(this.sceneEl, EVENTS.OBJECT.ACTION, { action: 'complete-object-definition' });
+  
+  // Get scene state to get the permanently saved object ID
+  const sceneState = this.sceneEl.systems['scene-state'];
+  const savedObjectId = sceneState ? sceneState.getState('currentObjectId') : null;
+  
+  console.log('Object Definition Menu: Using saved object ID for anchors:', savedObjectId);
+  
+  // Get object definition component
   const objectDef = document.getElementById('objectDefinition');
-  let tempObjectId = null;
   
-  if (objectDef && objectDef.components['object-definition'] && 
-      typeof objectDef.components['object-definition'].getCurrentTempObjectId === 'function') {
-    // Try to get the temporary object ID for the current object being defined
-    tempObjectId = objectDef.components['object-definition'].getCurrentTempObjectId();
+  // Important: Tell the object-definition component to preserve the object visualization
+  // before navigating to the anchor placement menu
+  if (objectDef && objectDef.components['object-definition']) {
+    objectDef.setAttribute('object-definition', 'active', true);
+    // Prevent cleanup from hiding the object during menu transition
+    objectDef.components['object-definition'].preserveForAnchoring = true;
   }
-  
-  if (!tempObjectId) {
-    // Fallback to the currentObjectId in scene state
-    const sceneState = this.sceneEl.systems['scene-state'];
-    tempObjectId = sceneState ? sceneState.getState('currentObjectId') : null;
-  }
-  
-  console.log('Object Definition Menu: Using object ID for anchors:', tempObjectId);
   
   // Navigate to anchor placement menu
   emitEvent(this.sceneEl, EVENTS.ANCHOR.ACTION, { 
     action: 'start-anchor-placement',
-    objectId: tempObjectId
+    objectId: savedObjectId
   });
   
   // Navigate to anchor placement menu with objectId as parameter
-  this.emitMenuAction('anchor-placement', { objectId: tempObjectId });
+  this.emitMenuAction('anchor-placement', { objectId: savedObjectId });
 };
 
 // Handle start button click
@@ -634,6 +636,15 @@ ObjectDefinitionMenu.editObjectAnchors = function(objectId) {
     return;
   }
   
+  // Important: Tell the object-definition component to preserve the object visualization
+  // before navigating to the anchor placement menu
+  const objectDef = document.getElementById('objectDefinition');
+  if (objectDef && objectDef.components['object-definition']) {
+    objectDef.setAttribute('object-definition', 'active', true);
+    // Prevent cleanup from hiding the object during menu transition
+    objectDef.components['object-definition'].preserveForAnchoring = true;
+  }
+  
   // Tell the anchor placement component to start with this object
   emitEvent(this.sceneEl, EVENTS.ANCHOR.ACTION, { 
     action: 'start-anchor-placement',
@@ -654,9 +665,16 @@ ObjectDefinitionMenu.cleanup = function() {
   
   // Deactivate object definition component when this menu is closed
   const objectDef = document.getElementById('objectDefinition');
-  if (objectDef) {
-    objectDef.setAttribute('object-definition', 'active', false);
-    console.log('Object Definition Menu: Deactivated object definition component');
+  if (objectDef && objectDef.components['object-definition']) {
+    // Only deactivate the component if we're not transitioning to anchor placement
+    if (!objectDef.components['object-definition'].preserveForAnchoring) {
+      objectDef.setAttribute('object-definition', 'active', false);
+      console.log('Object Definition Menu: Deactivated object definition component');
+    } else {
+      console.log('Object Definition Menu: Keeping object definition active for anchoring');
+      // Reset the flag so it doesn't persist indefinitely
+      objectDef.components['object-definition'].preserveForAnchoring = false;
+    }
   }
 };
 

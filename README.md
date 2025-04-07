@@ -20,10 +20,10 @@ O3Measure is an AR application that helps users measure and visualize where to h
 
 ## Technology Stack
 
-- React with [react-three-fiber](https://github.com/pmndrs/react-three-fiber)
-- WebXR through [@react-three/xr](https://github.com/pmndrs/react-xr)
-- Three.js for 3D rendering
+- A-Frame for WebXR and 3D rendering
+- Three.js (through A-Frame) for 3D math and operations
 - Vite for build and development
+- Vitest for unit testing
 
 ## Development
 
@@ -43,6 +43,34 @@ npm run dev
 
 # Start development server on LAN (for device testing)
 npm run dev -- --host
+```
+
+### Testing
+
+The project uses Vitest for testing, with specialized setup for testing A-Frame and WebXR components.
+
+```bash
+# Run all unit tests
+npm run test
+
+# Run tests in watch mode during development
+npm run test:watch
+
+# Generate test coverage report
+npm run test:coverage
+
+# Run specific test groups
+npm run test:utils      # Test utility functions
+npm run test:components # Test A-Frame components
+npm run test:state      # Test state management
+npm run test:webxr      # Test WebXR integration
+```
+
+Tests are organized to mirror the project structure and include:
+- Pure utility function tests
+- A-Frame component lifecycle tests
+- WebXR integration tests
+- State management tests
 ```
 
 ### Building for Production

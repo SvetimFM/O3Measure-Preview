@@ -100,8 +100,10 @@ AFRAME.registerComponent('object-renderer', {
     // Create entity for this object
     const objectEntity = document.createElement('a-entity');
     objectEntity.setAttribute('id', objectData.id);
-    objectEntity.setAttribute('class', 'rendered-object');
+    objectEntity.setAttribute('class', 'rendered-object anchoring-enabled');
     objectEntity.setAttribute('visible', objectData.visible);
+    objectEntity.setAttribute('data-id', objectData.id);
+    objectEntity.setAttribute('data-collideable', 'true');
     
     // Create rectangle visualization
     const width = objectData.width;
@@ -127,6 +129,13 @@ AFRAME.registerComponent('object-renderer', {
     rectangle.setAttribute('color', '#42D544');
     rectangle.setAttribute('opacity', 0.2);
     rectangle.setAttribute('side', 'double');
+    
+    // Add anchoring-enabled class and data-id for interaction
+    rectangle.setAttribute('class', 'anchoring-enabled');
+    rectangle.setAttribute('data-id', objectData.id);
+    rectangle.setAttribute('data-collideable', 'true');
+    rectangle.setAttribute('id', `plane-${objectData.id}`);
+    
     objectEntity.appendChild(rectangle);
     
     // Add dimensions labels
