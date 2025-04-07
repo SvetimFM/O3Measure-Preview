@@ -14,6 +14,7 @@ const EVENTS = {
   OBJECT: {
     CREATED: 'object-created',
     DELETED: 'object-deleted',
+    UPDATED: 'object-updated',
     ACTION: 'object-action',
     STATUS: 'object-status'
   },

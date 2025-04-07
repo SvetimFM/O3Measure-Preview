@@ -69,6 +69,15 @@ AFRAME.registerSystem('scene-state', {
       // Update state
       this.updateState('objects', objects);
       
+      // Also update the currentObjectId to ensure proper highlighting in the UI
+      this.updateState('currentObjectId', objectId);
+      
+      // Emit an event so any renderers can update the object with anchors
+      this.el.emit(EVENTS.OBJECT.UPDATED, {
+        objectId: objectId,
+        object: objects[objectIndex]
+      });
+      
       console.log('Scene State: Object anchors updated successfully');
     } else {
       console.error('Scene State: Object not found for anchor update:', objectId);

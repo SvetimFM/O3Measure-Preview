@@ -249,6 +249,12 @@ AnchorPlacementMenu.handleAutoPlaceAnchors = function() {
 
 // Handle reset button
 AnchorPlacementMenu.handleResetButton = function() {
+  // Show confirmation before proceeding
+  const statusElement = document.getElementById('anchor-status');
+  if (statusElement) {
+    statusElement.setAttribute('value', 'Anchors cleared. Place new ones or cancel to keep original.');
+  }
+
   // Emit reset event directly, including objectId
   this.sceneEl.emit('anchor-action', { 
     action: 'reset-anchors',
@@ -270,12 +276,24 @@ AnchorPlacementMenu.handleCompleteButton = function() {
     objectId: this.objectId
   });
   
+  // Show feedback to user
+  const statusElement = document.getElementById('anchor-status');
+  if (statusElement) {
+    statusElement.setAttribute('value', 'Anchors saved successfully!');
+  }
+  
   // Return to previous menu with objectId as parameter
   this.emitMenuAction('anchor-placement-completed', { objectId: this.objectId });
 };
 
 // Handle back button
 AnchorPlacementMenu.handleBackButton = function() {
+  // Show confirmation to the user
+  const statusElement = document.getElementById('anchor-status');
+  if (statusElement) {
+    statusElement.setAttribute('value', 'Anchor placement cancelled. Original anchors preserved.');
+  }
+
   // Clean up first, including objectId
   this.sceneEl.emit('anchor-action', { 
     action: 'cancel-anchor-placement',

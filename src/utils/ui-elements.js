@@ -19,26 +19,29 @@ const THREE = window.THREE;
 function createMarker(position, label, color = '#4285F4', parent = null) {
   // Create a visual marker at the specified point
   const marker = document.createElement('a-entity');
-  marker.setAttribute('class', 'marker');
+  marker.setAttribute('class', 'marker anchor-marker');
   
-  // Create sphere for the marker
-  const sphere = document.createElement('a-sphere');
-  sphere.setAttribute('radius', 0.01);
-  sphere.setAttribute('color', color);
-  sphere.setAttribute('shader', 'flat');
-  marker.appendChild(sphere);
+  // Create a ring (reticle) that is coplanar with the object
+  const outerRing = document.createElement('a-ring');
+  outerRing.setAttribute('radius-inner', 0.008); // Inner radius for the transparent center
+  outerRing.setAttribute('radius-outer', 0.012); // Outer radius for the visible ring
+  outerRing.setAttribute('color', color);
+  outerRing.setAttribute('shader', 'flat');
+  // No rotation - the ring will be coplanar with the object it's attached to
+  outerRing.setAttribute('segments-theta', 32); // Higher segment count for smoother circle
   
-  // Add label if provided
-  if (label) {
-    const labelEntity = document.createElement('a-text');
-    labelEntity.setAttribute('value', `${label}`);
-    labelEntity.setAttribute('align', 'center');
-    labelEntity.setAttribute('position', '0 0.05 0');
-    labelEntity.setAttribute('scale', '0.1 0.1 0.1');
-    labelEntity.setAttribute('color', '#FFFFFF');
-    labelEntity.setAttribute('look-at', '[camera]');
-    marker.appendChild(labelEntity);
-  }
+  // Add inner dot (optional, can be removed for fully transparent center)
+  const innerDot = document.createElement('a-circle');
+  innerDot.setAttribute('radius', 0.002); // Tiny center dot
+  innerDot.setAttribute('color', '#FF0000'); // Red center dot to mark exact drill point
+  innerDot.setAttribute('shader', 'flat');
+  // No rotation - will be coplanar with parent
+  innerDot.setAttribute('position', '0 0 0.0005'); // Very slight offset to prevent z-fighting
+  
+  marker.appendChild(outerRing);
+  marker.appendChild(innerDot);
+  
+  // No labels for anchors anymore - they just need to be visible markers
   
   // Set position
   if (position instanceof THREE.Vector3) {

@@ -81,9 +81,15 @@ AFRAME.registerComponent('anchor-placement', {
         break;
         
       case 'cancel-anchor-placement':
+        // Reset the working state
         this.reset();
         this.step = 0;
-        this.emitStatus('cancelled', 'Anchor placement cancelled', 
+        
+        // Important: For cancellation, we don't save any changes
+        // The original object's anchors will remain unchanged
+        console.log('Anchor Placement: Cancelled - original anchors preserved');
+        
+        this.emitStatus('cancelled', 'Anchor placement cancelled - original anchors preserved', 
                       { objectId: objectId || this.currentObject });
         break;
     }
@@ -180,8 +186,10 @@ AFRAME.registerComponent('anchor-placement', {
       }
       
       // Set up raycaster component targeting only our specific object
+      // Make raycaster point downward instead of forward
       rayEntity.setAttribute('raycaster', {
         objects: raycasterObjects,
+        direction: '0 -1 0', // Point downward (-Y direction)
         far: 10,
         lineColor: hand === 'left' ? '#4285F4' : '#F4B400',
         lineOpacity: 0.7,
@@ -762,7 +770,7 @@ AFRAME.registerComponent('anchor-placement', {
   },
   
   /**
-   * Reset state and clean up
+   * Reset state and clean up - clears current working state but doesn't affect saved anchors
    */
   reset: function() {
     // Clean up anchor markers
@@ -781,6 +789,8 @@ AFRAME.registerComponent('anchor-placement', {
       this.emitStatus('reset', 
         `Use laser to place ${this.data.anchorCount} anchors. Press trigger to place.`,
         { anchorCount: 0 });
+        
+      console.log('Anchor Placement: Reset completed, working state cleared. Original object anchors preserved until save/cancel.');
     }
   },
   

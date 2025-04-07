@@ -5,6 +5,7 @@
  */
 
 import { events } from '../../utils/index.js';
+import { createMarker } from '../../utils/ui-elements.js';
 const { EVENTS } = events;
 
 AFRAME.registerComponent('object-renderer', {
@@ -30,6 +31,7 @@ AFRAME.registerComponent('object-renderer', {
     
     // Bind methods
     this.onObjectCreated = this.onObjectCreated.bind(this);
+    this.onObjectUpdated = this.onObjectUpdated.bind(this);
     this.onStateChanged = this.onStateChanged.bind(this);
     
     // Set up event listeners
@@ -44,6 +46,7 @@ AFRAME.registerComponent('object-renderer', {
   setupEventListeners: function() {
     // Listen for object-related events
     this.el.sceneEl.addEventListener(EVENTS.OBJECT.CREATED, this.onObjectCreated);
+    this.el.sceneEl.addEventListener(EVENTS.OBJECT.UPDATED, this.onObjectUpdated);
     
     // Listen for state changes
     if (this.sceneState) {
@@ -63,6 +66,25 @@ AFRAME.registerComponent('object-renderer', {
       // Render the new object
       this.renderObject(objectData);
     }
+  },
+  
+  // Handle object updates (e.g. when anchors are added)
+  onObjectUpdated: function(event) {
+    const { objectId, object } = event.detail;
+    
+    console.log('Object Renderer: Object updated', objectId, object);
+    
+    // Update the object in our local array
+    const index = this.objects.findIndex(obj => obj.id === objectId);
+    if (index >= 0) {
+      this.objects[index] = object;
+    } else {
+      // If not found, add it
+      this.objects.push(object);
+    }
+    
+    // Update the rendered object
+    this.updateObject(object);
   },
   
   onStateChanged: function(event) {
@@ -141,6 +163,11 @@ AFRAME.registerComponent('object-renderer', {
     // Add dimensions labels
     this.addDimensionsLabels(objectEntity, objectData);
     
+    // Add anchor points if available
+    if (objectData.anchors && objectData.anchors.length > 0) {
+      this.renderAnchors(objectEntity, objectData.anchors, rectangle);
+    }
+    
     // Add to container
     this.container.appendChild(objectEntity);
     
@@ -163,8 +190,25 @@ AFRAME.registerComponent('object-renderer', {
     // Update visibility
     rendered.entity.setAttribute('visible', objectData.visible);
     
-    // Update other properties as needed
-    // ...
+    // Check if anchors have changed - remove old and add new
+    // First find the plane element
+    const planeEl = rendered.entity.querySelector('a-plane') || 
+                    document.getElementById(`plane-${objectData.id}`);
+    
+    if (planeEl) {
+      // Remove any existing anchor markers
+      const existingAnchors = rendered.entity.querySelectorAll('.anchor-marker');
+      existingAnchors.forEach(anchor => {
+        if (anchor.parentNode) {
+          anchor.parentNode.removeChild(anchor);
+        }
+      });
+      
+      // Add updated anchors if available
+      if (objectData.anchors && objectData.anchors.length > 0) {
+        this.renderAnchors(rendered.entity, objectData.anchors, planeEl);
+      }
+    }
     
     // Update data reference
     rendered.data = objectData;
@@ -194,6 +238,31 @@ AFRAME.registerComponent('object-renderer', {
       
       parent.appendChild(line);
     }
+  },
+  
+  // Render anchor markers on the object
+  renderAnchors: function(parentEntity, anchors, planeEl) {
+    if (!anchors || !anchors.length || !planeEl) return;
+    
+    console.log(`Object Renderer: Rendering ${anchors.length} anchors`);
+    
+    // Add each anchor as a marker
+    anchors.forEach((anchor, index) => {
+      // Anchor colors - use the same scheme as in anchor-placement.js
+      const anchorColors = ['#F4B400', '#DB4437', '#4285F4', '#0F9D58'];
+      const color = anchorColors[index % anchorColors.length];
+      
+      // Create marker using the reticle style from our updated createMarker function
+      const marker = createMarker(
+        anchor.position, // Use the stored local position
+        index + 1,      // Label with number
+        color,          // Use color from our scheme
+        null            // Don't add to scene directly
+      );
+      
+      // Add to plane element for proper positioning
+      planeEl.appendChild(marker);
+    });
   },
   
   // Add dimension labels to the object
@@ -293,6 +362,7 @@ AFRAME.registerComponent('object-renderer', {
   remove: function() {
     // Clean up event listeners
     this.el.sceneEl.removeEventListener(EVENTS.OBJECT.CREATED, this.onObjectCreated);
+    this.el.sceneEl.removeEventListener(EVENTS.OBJECT.UPDATED, this.onObjectUpdated);
     if (this.sceneState) {
       this.el.sceneEl.removeEventListener(EVENTS.STATE.CHANGED, this.onStateChanged);
     }
