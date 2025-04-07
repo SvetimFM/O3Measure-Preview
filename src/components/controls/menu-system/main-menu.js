@@ -53,7 +53,7 @@ MainMenu.createMenuButtons = function() {
       label: 'View Objects', 
       color: Colors.SECONDARY, 
       position: `0 ${startY - spacing} 0`,
-      handler: (event) => this.handleButtonPress('view-objects', event)
+      handler: (event) => this.handleButtonPress('view-items', event)
     },
     { 
       label: 'Wall Calibration', 

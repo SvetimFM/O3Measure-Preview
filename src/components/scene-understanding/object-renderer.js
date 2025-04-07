@@ -47,6 +47,7 @@ AFRAME.registerComponent('object-renderer', {
     // Listen for object-related events
     this.el.sceneEl.addEventListener(EVENTS.OBJECT.CREATED, this.onObjectCreated);
     this.el.sceneEl.addEventListener(EVENTS.OBJECT.UPDATED, this.onObjectUpdated);
+    this.el.sceneEl.addEventListener(EVENTS.OBJECT.ACTION, this.onObjectAction.bind(this));
     
     // Listen for state changes
     if (this.sceneState) {
@@ -95,6 +96,106 @@ AFRAME.registerComponent('object-renderer', {
       console.log('Object Renderer: Objects state changed', detail.value);
       this.objects = detail.value;
       this.updateRenderedObjects();
+    }
+  },
+  
+  // Handle object actions (like project-on-wall)
+  onObjectAction: function(event) {
+    const { action, objectId, object } = event.detail;
+    
+    if (action === 'project-on-wall') {
+      console.log('Object Renderer: Projecting object on wall', objectId);
+      
+      // Always get the most up-to-date object from scene state
+      let targetObject = null;
+      
+      if (this.sceneState) {
+        const stateObjects = this.sceneState.getState('objects') || [];
+        targetObject = stateObjects.find(obj => obj.id === objectId);
+        
+        if (targetObject) {
+          console.log('Object Renderer: Found object in scene state with',
+            targetObject.anchors ? targetObject.anchors.length : 0, 'anchors');
+        }
+      }
+      
+      // Fall back to provided object or local cache if not in state
+      if (!targetObject) {
+        targetObject = object || this.objects.find(obj => obj.id === objectId);
+        console.log('Object Renderer: Using fallback object data');
+      }
+      
+      if (!targetObject) {
+        console.error('Object Renderer: Cannot project object, not found:', objectId);
+        return;
+      }
+      
+      // Ensure the object is visible
+      targetObject.visible = true;
+      
+      // Check if this object is already projected on the wall
+      const existingEntity = document.getElementById(`wall-object-${targetObject.id}`);
+      
+      if (existingEntity) {
+        // Update the existing entity
+        existingEntity.setAttribute('position', targetObject.center);
+        existingEntity.setAttribute('data-object', JSON.stringify(targetObject));
+        
+        // Ensure draggable component is updated
+        if (existingEntity.hasAttribute('draggable-wall-object')) {
+          existingEntity.setAttribute('draggable-wall-object', {
+            objectId: targetObject.id,
+            active: true
+          });
+        } else {
+          existingEntity.setAttribute('draggable-wall-object', {
+            objectId: targetObject.id,
+            active: true,
+            opacity: 0.1
+          });
+        }
+      } else {
+        // Get wall entity to place object on it
+        const wallEntity = document.querySelector('[wall-plane]');
+        
+        if (!wallEntity) {
+          console.error('Object Renderer: Cannot project object, wall plane not found');
+          return;
+        }
+        
+        // Get wall position and rotation
+        const wallPosition = wallEntity.getAttribute('position');
+        const wallRotation = wallEntity.getAttribute('rotation');
+        
+        console.log('Object Renderer: Wall position:', wallPosition, 'rotation:', wallRotation);
+        
+        // Initially place object at center of wall (user will drag it to position)
+        // Create a new entity that will handle both rendering and dragging
+        const wallObjectEntity = document.createElement('a-entity');
+        wallObjectEntity.setAttribute('id', `wall-object-${targetObject.id}`);
+        
+        // Start at wall position - the draggable-wall-object component will place it exactly on the wall plane
+        wallObjectEntity.setAttribute('position', wallPosition);
+        wallObjectEntity.setAttribute('data-object', JSON.stringify(targetObject));
+        
+        // Add the draggable-wall-object component
+        wallObjectEntity.setAttribute('draggable-wall-object', {
+          objectId: targetObject.id,
+          active: true,
+          opacity: 0.1
+        });
+        
+        // Add to scene
+        this.el.sceneEl.appendChild(wallObjectEntity);
+      }
+      
+      // Store the object data in the renderer's objects list
+      const existingIndex = this.objects.findIndex(o => o.id === targetObject.id);
+      if (existingIndex >= 0) {
+        this.objects[existingIndex] = targetObject;
+      } else {
+        this.objects.push(targetObject);
+      }
     }
   },
   
@@ -363,6 +464,7 @@ AFRAME.registerComponent('object-renderer', {
     // Clean up event listeners
     this.el.sceneEl.removeEventListener(EVENTS.OBJECT.CREATED, this.onObjectCreated);
     this.el.sceneEl.removeEventListener(EVENTS.OBJECT.UPDATED, this.onObjectUpdated);
+    this.el.sceneEl.removeEventListener(EVENTS.OBJECT.ACTION, this.onObjectAction);
     if (this.sceneState) {
       this.el.sceneEl.removeEventListener(EVENTS.STATE.CHANGED, this.onStateChanged);
     }
@@ -376,6 +478,14 @@ AFRAME.registerComponent('object-renderer', {
     if (this.container.parentNode) {
       this.container.parentNode.removeChild(this.container);
     }
+    
+    // Clean up any draggable entities
+    Object.keys(this.renderedObjects).forEach(id => {
+      const draggableEntity = document.getElementById(`draggable-${id}`);
+      if (draggableEntity && draggableEntity.parentNode) {
+        draggableEntity.parentNode.removeChild(draggableEntity);
+      }
+    });
   }
 });
 

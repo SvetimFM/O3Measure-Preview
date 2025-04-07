@@ -42,15 +42,17 @@ AFRAME.registerComponent('wall-plane', {
     this.planeContainer.setAttribute('class', 'wall-container');
     this.planeContainer.setAttribute('visible', this.data.visible);
     
-    // Create invisible interaction plane
+    // Create semi-transparent interaction plane
     this.plane = document.createElement('a-plane');
     this.plane.setAttribute('width', this.data.width);
     this.plane.setAttribute('height', this.data.height);
     this.plane.setAttribute('color', this.data.color);
-    this.plane.setAttribute('opacity', 0); // Invisible
-    this.plane.setAttribute('visible', false); // Not rendered at all
+    this.plane.setAttribute('opacity', 0.01); // Very low opacity but still rendered
+    this.plane.setAttribute('visible', true); // Must be visible for raycasting
     this.plane.setAttribute('side', 'double');
-    this.plane.setAttribute('class', 'wall-plane');
+    this.plane.setAttribute('class', 'wall-plane interactive anchoring-enabled');
+    this.plane.setAttribute('data-collideable', 'true');
+    this.plane.setAttribute('id', 'wall-interaction-plane');
     
     // Create grid container
     this.gridContainer = document.createElement('a-entity');
@@ -189,6 +191,24 @@ AFRAME.registerComponent('wall-plane', {
         case 'opacity':
           // Keep the plane invisible regardless of state
           break;
+        case 'isCalibrated':
+          // Update the calibration state
+          this.el.setAttribute('data-calibrated', value);
+          // If wall is calibrated, make sure it's visible
+          if (value === true) {
+            this.planeContainer.setAttribute('visible', true);
+            
+            // Also store the state
+            if (this.sceneState) {
+              this.sceneState.updateState('calibration.wall.visible', true);
+            }
+            
+            // Emit calibration complete event
+            this.el.sceneEl.emit(EVENTS.WALL.CALIBRATION_COMPLETE, {
+              isCalibrated: true
+            });
+          }
+          break;
       }
     }
   },
@@ -208,8 +228,9 @@ AFRAME.registerComponent('wall-plane', {
     
     // Color changes don't apply to the invisible plane
     
-    // Keep the plane completely invisible
-    this.plane.setAttribute('opacity', 0);
+    // Keep the plane with very low opacity but still visible for interaction
+    this.plane.setAttribute('opacity', 0.01);
+    this.plane.setAttribute('visible', true);
     
     if (oldData.visible !== this.data.visible) {
       // Visibility applies to the whole container

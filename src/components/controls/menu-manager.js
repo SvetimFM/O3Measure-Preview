@@ -179,9 +179,9 @@ AFRAME.registerComponent('menu-manager', {
         this.showMenu('object-definition', params);
         break;
         
-      case 'view-objects':
-        // This would navigate to an object viewer menu
-        console.log('Menu Manager: View Objects feature not yet implemented');
+      case 'view-items':
+        // Navigate to the view items menu
+        this.pushMenu('view-items', params);
         break;
         
       case 'back-to-main-menu':
