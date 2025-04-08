@@ -49,6 +49,9 @@ AFRAME.registerComponent('object-renderer', {
     this.el.sceneEl.addEventListener(EVENTS.OBJECT.UPDATED, this.onObjectUpdated);
     this.el.sceneEl.addEventListener(EVENTS.OBJECT.ACTION, this.onObjectAction.bind(this));
     
+    // Listen for wall calibration events to handle projecting objects onto newly calibrated walls
+    this.el.sceneEl.addEventListener(EVENTS.WALL.CALIBRATION_COMPLETE, this.onWallCalibrationComplete.bind(this));
+    
     // Listen for state changes
     if (this.sceneState) {
       this.el.sceneEl.addEventListener(EVENTS.STATE.CHANGED, this.onStateChanged);
@@ -174,15 +177,22 @@ AFRAME.registerComponent('object-renderer', {
         const wallObjectEntity = document.createElement('a-entity');
         wallObjectEntity.setAttribute('id', `wall-object-${targetObject.id}`);
         
+        // Add z-offset to ensure object renders in front of the wall plane (prevents z-fighting)
+        const wallPositionWithOffset = {
+          x: wallPosition.x,
+          y: wallPosition.y,
+          z: wallPosition.z + 0.005 // Increased offset to ensure it's in front of all wall elements
+        };
+        
         // Start at wall position - the draggable-wall-object component will place it exactly on the wall plane
-        wallObjectEntity.setAttribute('position', wallPosition);
+        wallObjectEntity.setAttribute('position', wallPositionWithOffset);
         wallObjectEntity.setAttribute('data-object', JSON.stringify(targetObject));
         
         // Add the draggable-wall-object component
         wallObjectEntity.setAttribute('draggable-wall-object', {
           objectId: targetObject.id,
           active: true,
-          opacity: 0.1
+          opacity: 0.3  // Increased opacity for better visibility from all angles
         });
         
         // Add to scene
@@ -204,9 +214,10 @@ AFRAME.registerComponent('object-renderer', {
       const objects = this.sceneState.getState('objects');
       
       if (objects && Array.isArray(objects)) {
-        console.log('Object Renderer: Initializing from state', objects);
+        console.log('Object Renderer: Loading objects from state into memory (not rendering yet)', objects);
         this.objects = objects;
-        this.updateRenderedObjects();
+        // Do NOT call updateRenderedObjects() here - we just want to store objects in memory
+        // Objects should only be rendered when explicitly requested from View Items menu
       }
     }
   },
@@ -460,11 +471,63 @@ AFRAME.registerComponent('object-renderer', {
     }
   },
   
+  // Handle wall calibration completed event
+  onWallCalibrationComplete: function(event) {
+    const { isCalibrated } = event.detail;
+    
+    if (isCalibrated) {
+      console.log('Object Renderer: Wall calibrated, checking for objects to project');
+      
+      // Get all objects from state
+      const objects = this.sceneState ? this.sceneState.getState('objects') || [] : this.objects;
+      
+      // Check if there are any objects that could be projected
+      if (objects.length > 0) {
+        console.log(`Object Renderer: Found ${objects.length} objects that may need projection`);
+        
+        // Verify wall is available and ready
+        const wallEntity = document.querySelector('[wall-plane]');
+        if (!wallEntity) {
+          console.error('Object Renderer: Wall calibrated but no wall entity found');
+          return;
+        }
+        
+        // For any existing wall-object entities, update their wall reference
+        objects.forEach(obj => {
+          const wallObjectId = `wall-object-${obj.id}`;
+          const existingEntity = document.getElementById(wallObjectId);
+          
+          if (existingEntity && existingEntity.components['draggable-wall-object']) {
+            console.log(`Object Renderer: Updating existing wall object ${obj.id}`);
+            
+            // Force an update of the wall reference
+            existingEntity.components['draggable-wall-object'].wallEntity = wallEntity;
+            existingEntity.components['draggable-wall-object'].updateWallReference();
+            
+            // Also update visibility based on wall
+            const wallPlaneContainer = wallEntity.querySelector('.wall-container');
+            if (wallPlaneContainer && wallPlaneContainer.getAttribute('visible')) {
+              existingEntity.setAttribute('visible', true);
+            }
+          } else if (!existingEntity) {
+            // Objects should NOT auto-project when wall is calibrated
+            // They should only project when explicitly requested from View Items menu
+            console.log(`Object Renderer: Object ${obj.id} exists but is not projected on wall (waiting for user selection from View Items)`);
+            
+            // Do NOT auto-project objects here - let the user select them from View Items
+          }
+        });
+      }
+    }
+  },
+  
   remove: function() {
     // Clean up event listeners
     this.el.sceneEl.removeEventListener(EVENTS.OBJECT.CREATED, this.onObjectCreated);
     this.el.sceneEl.removeEventListener(EVENTS.OBJECT.UPDATED, this.onObjectUpdated);
     this.el.sceneEl.removeEventListener(EVENTS.OBJECT.ACTION, this.onObjectAction);
+    this.el.sceneEl.removeEventListener(EVENTS.WALL.CALIBRATION_COMPLETE, this.onWallCalibrationComplete);
+    
     if (this.sceneState) {
       this.el.sceneEl.removeEventListener(EVENTS.STATE.CHANGED, this.onStateChanged);
     }

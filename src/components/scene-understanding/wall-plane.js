@@ -47,8 +47,8 @@ AFRAME.registerComponent('wall-plane', {
     this.plane.setAttribute('width', this.data.width);
     this.plane.setAttribute('height', this.data.height);
     this.plane.setAttribute('color', this.data.color);
-    this.plane.setAttribute('opacity', 0.01); // Very low opacity but still rendered
-    this.plane.setAttribute('visible', true); // Must be visible for raycasting
+    this.plane.setAttribute('opacity', 0); // Completely transparent
+    this.plane.setAttribute('visible', false); // No need for visibility since we're not raycasting against it
     this.plane.setAttribute('side', 'double');
     this.plane.setAttribute('class', 'wall-plane interactive anchoring-enabled');
     this.plane.setAttribute('data-collideable', 'true');
@@ -151,6 +151,17 @@ AFRAME.registerComponent('wall-plane', {
     this.el.setAttribute('rotation', defaultRot);
     this.planeContainer.setAttribute('visible', false);
     
+    // Notify all wall objects to update their visibility
+    this.el.sceneEl.querySelectorAll('[draggable-wall-object]').forEach(obj => {
+      obj.setAttribute('visible', false);
+    });
+    
+    // Emit an event that objects can listen for
+    this.el.sceneEl.emit(EVENTS.WALL.CALIBRATION_COMPLETE, {
+      isCalibrated: false,
+      wallVisible: false
+    });
+    
     console.log('Wall Plane: Reset to default position');
   },
   
@@ -228,9 +239,9 @@ AFRAME.registerComponent('wall-plane', {
     
     // Color changes don't apply to the invisible plane
     
-    // Keep the plane with very low opacity but still visible for interaction
-    this.plane.setAttribute('opacity', 0.01);
-    this.plane.setAttribute('visible', true);
+    // Keep the plane completely invisible since we don't need it for interaction
+    this.plane.setAttribute('opacity', 0);
+    this.plane.setAttribute('visible', false);
     
     if (oldData.visible !== this.data.visible) {
       // Visibility applies to the whole container

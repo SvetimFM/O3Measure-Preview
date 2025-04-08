@@ -27,6 +27,7 @@ function createMarker(position, label, color = '#4285F4', parent = null) {
   outerRing.setAttribute('radius-outer', 0.012); // Outer radius for the visible ring
   outerRing.setAttribute('color', color);
   outerRing.setAttribute('shader', 'flat');
+  outerRing.setAttribute('side', 'double'); // Make it visible from both sides
   // No rotation - the ring will be coplanar with the object it's attached to
   outerRing.setAttribute('segments-theta', 32); // Higher segment count for smoother circle
   
@@ -35,6 +36,7 @@ function createMarker(position, label, color = '#4285F4', parent = null) {
   innerDot.setAttribute('radius', 0.002); // Tiny center dot
   innerDot.setAttribute('color', '#FF0000'); // Red center dot to mark exact drill point
   innerDot.setAttribute('shader', 'flat');
+  innerDot.setAttribute('side', 'double'); // Make it visible from both sides
   // No rotation - will be coplanar with parent
   innerDot.setAttribute('position', '0 0 0.0005'); // Very slight offset to prevent z-fighting
   

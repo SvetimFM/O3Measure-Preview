@@ -97,14 +97,16 @@ AFRAME.registerComponent('draggable-wall-object', {
     const height = objectData.height;
     
     // Create interactive drag plane that's coplanar with the wall
+    // Using higher opacity (0.3 instead of 0.1) for better visibility from all angles
     this.dragPlane = document.createElement('a-plane');
     this.dragPlane.setAttribute('width', width);
     this.dragPlane.setAttribute('height', height);
-    this.dragPlane.setAttribute('opacity', this.data.opacity);
-    this.dragPlane.setAttribute('color', '#FFFFFF');
-    this.dragPlane.setAttribute('side', 'double');
+    this.dragPlane.setAttribute('opacity', 0.3); // Increased from data.opacity
+    this.dragPlane.setAttribute('color', '#42D544'); // Use green color matching the object
+    this.dragPlane.setAttribute('side', 'double'); // CRITICAL: Double-sided rendering
     this.dragPlane.setAttribute('class', 'drag-plane interactive');
     this.dragPlane.setAttribute('visible', true);
+    this.dragPlane.setAttribute('position', '0 0 0.01'); // Give it a z-offset to ensure it renders in front of wall
     
     // Add to entity
     this.el.appendChild(this.dragPlane);
@@ -120,29 +122,8 @@ AFRAME.registerComponent('draggable-wall-object', {
   createObjectVisuals: function(objectData) {
     console.log('Creating visual elements for object', objectData.id, 'with anchors:', objectData.anchors);
     
-    // Create a rectangle plane for the object
-    const rectangle = document.createElement('a-plane');
-    rectangle.setAttribute('width', objectData.width);
-    rectangle.setAttribute('height', objectData.height);
-    rectangle.setAttribute('position', '0 0 0.001'); // Slightly in front of drag plane
-    
-    // Set rotation to match the wall if available
-    if (this.wallEntity) {
-      const wallRotation = this.wallEntity.getAttribute('rotation');
-      if (wallRotation) {
-        // Object is already at the right position, no need for additional rotation
-      }
-    } else if (objectData.rotation) {
-      rectangle.setAttribute('rotation', objectData.rotation);
-    }
-    
-    // Make it visible but semi-transparent
-    rectangle.setAttribute('color', '#42D544');
-    rectangle.setAttribute('opacity', 0.2);
-    rectangle.setAttribute('side', 'double');
-    rectangle.setAttribute('class', 'object-plane');
-    
-    this.el.appendChild(rectangle);
+    // NOTE: We're now using the dragPlane as the main visual element
+    // The dragPlane is already created with higher opacity (0.3) and double-sided rendering
     
     // Add anchors if available - use a separate check to help debug
     if (objectData.anchors) {
@@ -206,7 +187,7 @@ AFRAME.registerComponent('draggable-wall-object', {
       const localPosition = {
         x: anchor.position.x,
         y: anchor.position.y,
-        z: 0.01 // Slightly in front of the plane
+        z: 0.015 // Increased offset to be more visible
       };
       
       console.log(`Creating anchor ${index} at local position:`, localPosition);
@@ -219,6 +200,16 @@ AFRAME.registerComponent('draggable-wall-object', {
         this.el          // Add directly to this entity
       );
       
+      // Ensure marker is visible from all angles by setting components to double-sided
+      marker.querySelectorAll('a-entity').forEach(el => {
+        // For entities with material component
+        if (el.hasAttribute('material')) {
+          const material = el.getAttribute('material');
+          material.side = 'double';
+          el.setAttribute('material', material);
+        }
+      });
+      
       // Ensure marker is visible
       marker.setAttribute('visible', true);
     });
@@ -229,35 +220,43 @@ AFRAME.registerComponent('draggable-wall-object', {
     const widthCm = (objectData.width * 100).toFixed(1);
     const heightCm = (objectData.height * 100).toFixed(1);
     
-    // Width label
+    // Width label with look-at camera behavior for auto-facing
     const widthLabel = document.createElement('a-entity');
-    widthLabel.setAttribute('position', `0 ${objectData.height/2 + 0.03} 0.002`);
+    widthLabel.setAttribute('position', `0 ${objectData.height/2 + 0.03} 0.005`);
     widthLabel.setAttribute('text', {
       value: `${widthCm} cm`,
       align: 'center',
       width: 0.5,
       color: '#FFFFFF'
     });
+    widthLabel.setAttribute('look-at', '[camera]'); // Auto-look at camera
     widthLabel.setAttribute('scale', '0.1 0.1 0.1');
     this.el.appendChild(widthLabel);
     
-    // Height label
+    // Height label with look-at camera behavior for auto-facing
     const heightLabel = document.createElement('a-entity');
-    heightLabel.setAttribute('position', `${objectData.width/2 + 0.03} 0 0.002`);
+    heightLabel.setAttribute('position', `${objectData.width/2 + 0.03} 0 0.005`);
     heightLabel.setAttribute('text', {
       value: `${heightCm} cm`,
       align: 'center',
       width: 0.5,
       color: '#FFFFFF'
     });
+    heightLabel.setAttribute('look-at', '[camera]'); // Auto-look at camera
     heightLabel.setAttribute('scale', '0.1 0.1 0.1');
     this.el.appendChild(heightLabel);
   },
   
   updateWallReference: function() {
+    // Find wall entity if not already set or if previously null
     if (!this.wallEntity) {
-      console.warn('Draggable Wall Object: No wall plane found');
-      return;
+      this.wallEntity = document.querySelector('[wall-plane]');
+      if (!this.wallEntity) {
+        console.warn('Draggable Wall Object: No wall plane found');
+        return;
+      } else {
+        console.log('Draggable Wall Object: Found wall plane that was previously missing');
+      }
     }
     
     // Get wall orientation
@@ -337,6 +336,13 @@ AFRAME.registerComponent('draggable-wall-object', {
       normal: this.wallNormal,
       point: point
     });
+    
+    // Make sure object is visible if wall is calibrated and visible
+    const wallPlaneContainer = this.wallEntity.querySelector('.wall-container');
+    if (wallPlaneContainer) {
+      const isWallVisible = wallPlaneContainer.getAttribute('visible');
+      this.el.setAttribute('visible', isWallVisible);
+    }
   },
   
   addEventListeners: function() {
@@ -356,11 +362,26 @@ AFRAME.registerComponent('draggable-wall-object', {
     // Listen for object updates
     this.sceneEl.addEventListener(EVENTS.OBJECT.UPDATED, this.onObjectUpdated.bind(this));
     
+    // Listen for wall calibration events
+    this.sceneEl.addEventListener(EVENTS.WALL.CALIBRATION_COMPLETE, this.onWallCalibrationChange.bind(this));
+    this.sceneEl.addEventListener(EVENTS.WALL.RESET, this.onWallReset.bind(this));
+    
     // Listen for wall plane updates
     if (this.wallEntity) {
       this.wallEntity.addEventListener('componentchanged', (evt) => {
         if (evt.detail.name === 'position' || evt.detail.name === 'rotation') {
           this.updateWallReference();
+        }
+        
+        // Also listen for visibility changes
+        if (evt.detail.name === 'visible' || 
+            (evt.detail.name === 'getAttribute' && evt.detail.attrName === 'visible')) {
+          // Get the wall container visibility
+          const container = this.wallEntity.querySelector('.wall-container');
+          if (container) {
+            const isWallVisible = container.getAttribute('visible');
+            this.el.setAttribute('visible', isWallVisible);
+          }
         }
       });
     }
@@ -575,6 +596,43 @@ AFRAME.registerComponent('draggable-wall-object', {
     }
   },
   
+  // Handle wall calibration events
+  onWallCalibrationChange: function(evt) {
+    const { isCalibrated, wallVisible } = evt.detail;
+    
+    // Update visibility based on calibration state
+    if (typeof wallVisible !== 'undefined') {
+      this.el.setAttribute('visible', !!wallVisible);
+    } else {
+      this.el.setAttribute('visible', !!isCalibrated);
+    }
+
+    // If wall has been recalibrated, we need to refresh our wall reference and alignment
+    // This is critical for objects created before the wall was calibrated
+    if (isCalibrated) {
+      // Make sure we have the latest wall entity reference 
+      this.wallEntity = document.querySelector('[wall-plane]');
+      
+      // Update wall reference and realign object to the wall
+      if (this.wallEntity) {
+        console.log('Draggable Wall Object: Wall recalibrated, updating reference and position');
+        this.updateWallReference();
+        
+        // Make object directly visible if wall is visible (critical for objects created before wall)
+        const wallPlaneContainer = this.wallEntity.querySelector('.wall-container');
+        if (wallPlaneContainer && wallPlaneContainer.getAttribute('visible')) {
+          this.el.setAttribute('visible', true);
+        }
+      }
+    }
+  },
+  
+  // Handle direct wall reset events
+  onWallReset: function() {
+    // When wall is reset, hide this object
+    this.el.setAttribute('visible', false);
+  },
+  
   remove: function() {
     // Remove event listeners
     if (this.dragPlane) {
@@ -593,6 +651,10 @@ AFRAME.registerComponent('draggable-wall-object', {
     
     // Remove event listener for object updates
     this.sceneEl.removeEventListener(EVENTS.OBJECT.UPDATED, this.onObjectUpdated);
+    
+    // Remove event listeners for wall events
+    this.sceneEl.removeEventListener(EVENTS.WALL.CALIBRATION_COMPLETE, this.onWallCalibrationChange);
+    this.sceneEl.removeEventListener(EVENTS.WALL.RESET, this.onWallReset);
     
     // Clean up all children
     while (this.el.firstChild) {

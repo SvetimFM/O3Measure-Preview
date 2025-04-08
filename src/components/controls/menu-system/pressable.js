@@ -10,8 +10,8 @@ import { events } from '../../../utils/index.js';
 const { EVENTS } = events;
 AFRAME.registerComponent('pressable', {
   schema: {
-    pressDistance: { default: 0.008 },  // Z-distance for press detection
-    hoverDistance: { default: 0.025 }   // Z-distance for hover detection
+    pressDistance: { default: 0.005 },  // Z-distance for press detection (reduced for less sensitivity)
+    hoverDistance: { default: 0.020 }   // Z-distance for hover detection (reduced for better discrimination)
   },
 
   init: function () {
@@ -19,6 +19,8 @@ AFRAME.registerComponent('pressable', {
     this.handEls = document.querySelectorAll('[hand-tracking-controls]');
     this.pressed = false;
     this.hovered = false;
+    this.hadRealPress = false; // Track if we had a legitimate press (not just hover)
+    this.pressDuration = 0; // Track how long the finger has been in press position
     
     // Create bounding box for button
     this.boundingBox = new THREE.Box3();
@@ -93,17 +95,23 @@ AFRAME.registerComponent('pressable', {
       }
     }
     
-    // Handle press state
+    // Handle press state with tracking if a real press occurred
     if (minDistance < this.data.pressDistance) {
       if (!this.pressed) { 
         this.el.emit(EVENTS.INTERACTION.PRESSED_STARTED);
         console.log('Button press started');
+        // Mark that we had an actual press (not just hovering)
+        this.hadRealPress = true;
       }
       this.pressed = true;
     } else if (this.pressed) {
-      this.el.emit(EVENTS.INTERACTION.PRESSED_ENDED); 
-      console.log('Button press ended');
+      // Only emit press ended if we actually had a real press first
+      if (this.hadRealPress) {
+        this.el.emit(EVENTS.INTERACTION.PRESSED_ENDED); 
+        console.log('Button press ended');
+      }
       this.pressed = false;
+      this.hadRealPress = false; // Reset for next interaction
     }
     
     // Handle hover state separately
