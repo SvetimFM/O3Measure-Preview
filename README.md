@@ -1,6 +1,6 @@
 # O3Measure - WebXR AR Object Hanging Assistant
 
-O3Measure is an AR application that helps users measure and visualize where to hang objects on walls. Using WebXR and React Three Fiber, the application provides an intuitive step-by-step workflow for precise object placement.
+O3Measure - an AR application that helps users measure and visualize where to hang objects on walls. Using WebXR and React Three Fiber, the application provides an intuitive step-by-step workflow for precise object placement.
 
 ## Features
 
