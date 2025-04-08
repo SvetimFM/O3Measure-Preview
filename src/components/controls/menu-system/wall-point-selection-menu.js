@@ -6,7 +6,7 @@
 
 import BaseMenu from './base-menu.js';
 import MenuRegistry from './menu-registry.js';
-import { events, Colors } from '../../../utils/index.js';
+import { events } from '../../../utils/index.js';
 
 const { EVENTS, emitEvent } = events;
 
@@ -33,17 +33,16 @@ WallPointSelectionMenu.init = function(container, data, sceneEl) {
 
 // Override render method with wall point selection menu content
 WallPointSelectionMenu.render = function() {
-  const { width, height, borderColor } = this.data;
   
   // Add title
-  const title = this.createTitle('Wall Calibration', height);
+  const title = this.createTitle('Wall Calibration', this.data.height);
   this.container.appendChild(title);
   
   // Add instructions text
   const instructions = this.createElement('a-text');
   instructions.setAttribute('value', 'Press Start to begin calibration');
   instructions.setAttribute('align', 'center');
-  instructions.setAttribute('position', `0 ${height/2 - 0.05} 0`);
+  instructions.setAttribute('position', `0 ${this.data.height/2 - 0.05} 0`);
   instructions.setAttribute('color', '#FFFFFF');
   instructions.setAttribute('scale', '0.03 0.03 0.03');
   instructions.setAttribute('id', 'calibration-instructions');
@@ -53,7 +52,7 @@ WallPointSelectionMenu.render = function() {
   const progress = this.createElement('a-text');
   progress.setAttribute('value', '0 / 3 points selected');
   progress.setAttribute('align', 'center');
-  progress.setAttribute('position', `0 ${height/2 - 0.08} 0`);
+  progress.setAttribute('position', `0 ${this.data.height/2 - 0.08} 0`);
   progress.setAttribute('color', '#4285F4');
   progress.setAttribute('scale', '0.035 0.035 0.035');
   progress.setAttribute('id', 'calibration-progress');

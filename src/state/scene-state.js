@@ -6,7 +6,7 @@
  * Components can access and modify state through this system
  */
 
-import { events, geometry } from '../utils/index.js';
+import { events } from '../utils/index.js';
 
 const { EVENTS, emitEvent } = events;
 

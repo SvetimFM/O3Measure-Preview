@@ -71,7 +71,6 @@ Tests are organized to mirror the project structure and include:
 - A-Frame component lifecycle tests
 - WebXR integration tests
 - State management tests
-```
 
 ### Building for Production
 
@@ -82,6 +81,40 @@ npm run build
 # Preview production build
 npm run preview
 ```
+
+## Future Improvements
+
+The following refactoring opportunities have been identified to improve code quality and maintainability:
+
+1. **Split Large Components:**
+   - Refactor anchor-placement.js (860+ lines) into smaller, focused components
+
+2. **Simplify Menu Navigation:**
+   - Replace large switch statement in menu-manager.js with data-driven navigation
+
+3. **Optimize DOM Manipulation:**
+   - Improve wall-plane.js grid pattern creation using single entity with custom shader
+
+4. **Streamline UI Panel Creation:**
+   - Simplify panel creation process in menu-manager.js using A-Frame templating
+
+5. **Standardize Event Handling:**
+   - Create consistent event structure for anchor status reporting
+
+6. **Reduce Code Duplication:**
+   - Extract common utility function for object lookup in anchor-placement.js
+
+7. **Optimize Vector Conversions:**
+   - Reduce redundant conversions in geometry.js functions
+
+8. **Improve Laser Control Logic:**
+   - Refactor complex laser control setup into separate component
+
+9. **Simplify State Management:**
+   - Replace large switch statement in wall-plane.js with declarative state mapping
+
+10. **Separate Menu Concerns:**
+    - Decouple menu stack management from rendering logic
 
 ## XR Device Support
 

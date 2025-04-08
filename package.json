@@ -17,6 +17,10 @@
     "test:webxr": "node --experimental-vm-modules tests/run-tests.js webxr"
   },
   "devDependencies": {
+    "@eslint/js": "^9.24.0",
+    "eslint": "^9.24.0",
+    "eslint-plugin-unused-imports": "^4.1.4",
+    "globals": "^16.0.0",
     "jsdom": "^23.0.1",
     "vite": "^6.0.5",
     "vite-plugin-mkcert": "^1.17.6",
