@@ -129,4 +129,4 @@ The following refactoring opportunities have been identified to improve code qua
 
 ## License
 
-MIT License
+Dis Is Ours (TM) License
