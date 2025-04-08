@@ -119,13 +119,13 @@ The following refactoring opportunities have been identified to improve code qua
 ## XR Device Support
 
 - Meta Quest headsets in developer mode
-- Android devices with ARCore support (using Chrome)
-- Limited support for iOS/Safari
+- Android devices with ImmersiveWebSimulator addon (using Chrome)
+- One day - support for iOS/Safari (ARKit)
 
 ## Browser Requirements
 
 - WebXR-compatible browser
-- HTTPS connection (required for WebXR)
+- HTTPS connection (required for WebXR, use ngrok! <3)
 
 ## License
 
