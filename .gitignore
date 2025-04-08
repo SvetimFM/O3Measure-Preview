@@ -26,4 +26,4 @@ dist-ssr
 *.pem
 ngrok
 .vscode
-.history/*
+.history/
