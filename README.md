@@ -1,5 +1,8 @@
 # O3Measure - Hand Tracking AR Measuring Tool
 
+![IMG_4434](https://github.com/user-attachments/assets/f8905643-c1e6-4ff1-adbb-558aca942d1e)
+
+
 > **🚧 Preview Release**: This is an early preview version of O3Measure. Features are still in development and may change. Please report any issues you encounter!
 
 [![License: CC BY-NC-ND 4.0](https://img.shields.io/badge/License-CC%20BY--NC--ND%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-nd/4.0/)
@@ -60,6 +63,11 @@ To run the O3Measure application locally, you will need Node.js and npm installe
 
 ## Usage
 
+![IMG_4436](https://github.com/user-attachments/assets/17d2d602-0c40-4d1a-9f33-f676ea605847)
+![IMG_4434](https://github.com/user-attachments/assets/f5ce97f8-fa20-4a24-b799-a8b16b79fc21)
+![IMG_4437](https://github.com/user-attachments/assets/0300e23e-bccb-42cb-9b86-ee6ccd92e0ae)
+![IMG_4435](https://github.com/user-attachments/assets/088bc961-6b53-4d91-8f2a-1ca2a491d303)
+
 To use the O3Measure application, you will need a WebXR-compatible headset with hand tracking capabilities.
 
 1.  **Open the Application:**
@@ -76,6 +84,7 @@ To use the O3Measure application, you will need a WebXR-compatible headset with 
     *   Follow the on-screen instructions to align the virtual wall with a physical wall in your environment.
 
 4.  **Define an Object:**
+
 
     *   Once the wall is calibrated, you can define objects by selecting "Object Definition" from the main menu.
     *   Use your hands to draw a rectangle on the calibrated wall to define the object.
