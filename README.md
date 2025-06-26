@@ -1,132 +1,77 @@
-# O3Measure - WebXR AR Object Hanging Assistant
+# O3Measure - Hand Tracking AR Measuring Tool
 
-O3Measure - an AR application that helps users measure and visualize where to hang objects on walls. Using WebXR and React Three Fiber, the application provides an intuitive step-by-step workflow for precise object placement.
+O3Measure is a WebXR application designed for **augmented reality (AR) headsets with hand tracking** that allows users to measure and define objects in their physical environment using hand tracking. The application provides a user-friendly interface for calibrating walls, defining objects, and placing anchors to create accurate digital representations of physical objects.
 
 ## Features
 
-- Wall selection and measurement
-- Object dimensioning
-- Anchor point definition
-- Visualization of object placement on walls
-- Real-time measurements in inches
-- Interactive AR UI attached to controllers
+*   **Wall Calibration:** Calibrate a virtual wall to align with a physical wall in your environment.
+*   **Object Definition:** Define objects by creating rectangles on the calibrated wall.
+*   **Anchor Placement:** Place anchors on defined objects to create a more accurate representation of the object's position and orientation.
+*   **Object Viewing:** View a list of all defined objects and their properties.
+*   **Hand Tracking:** Interact with the application using hand gestures.
 
-## Workflow Steps
+## Setup
 
-1. **Wall Selection**: Place dots to define a wall plane
-2. **Object Definition**: Mark dimensions by placing dots at corners
-3. **Anchor Selection**: Define mounting points on the object
-4. **Wall Projection**: Visualize and position object on the wall
+To run the O3Measure application, you will need to have Node.js and npm installed on your system. You will also need to use a tool like `ngrok` to create a secure tunnel to your local server. This is necessary because WebXR has strict CORS (Cross-Origin Resource Sharing) policies that prevent you from accessing local servers directly.
 
-## Technology Stack
+1.  **Install Dependencies:**
 
-- A-Frame for WebXR and 3D rendering
-- Three.js (through A-Frame) for 3D math and operations
-- Vite for build and development
-- Vitest for unit testing
+    ```bash
+    npm install
+    ```
 
-## Development
+2.  **Start Ngrok:**
 
-### Prerequisites
+    Open a new terminal window and run the following command to create a secure tunnel to your local server on port 3000:
 
-- Node.js and npm
-- XR-capable device for testing (Meta Quest, ARCore Android, etc.)
+    ```bash
+    ngrok http 5173
+    ```
 
-### Running Locally
+    This will provide you with a public URL that you can use to access the application from your headset.
 
-```bash
-# Install dependencies
-npm install
+3.  **Start the Development Server:**
 
-# Start development server with HTTPS
-npm run dev
+    In a separate terminal window, run the following command to start the development server:
 
-# Start development server on LAN (for device testing)
-npm run dev -- --host
-```
+    ```bash
+    npm run dev
+    ```
 
-### Testing
+    The application will be available at `http://localhost:5173`.
 
-The project uses Vitest for testing, with specialized setup for testing A-Frame and WebXR components.
+## Usage
 
-```bash
-# Run all unit tests
-npm run test
+To use the O3Measure application, you will need a WebXR-compatible headset with hand tracking capabilities.
 
-# Run tests in watch mode during development
-npm run test:watch
+1.  **Open the Application:**
 
-# Generate test coverage report
-npm run test:coverage
+    Open the public URL provided by `ngrok` in the browser of your headset.
 
-# Run specific test groups
-npm run test:utils      # Test utility functions
-npm run test:components # Test A-Frame components
-npm run test:state      # Test state management
-npm run test:webxr      # Test WebXR integration
-```
+2.  **Enter AR Mode:**
 
-Tests are organized to mirror the project structure and include:
-- Pure utility function tests
-- A-Frame component lifecycle tests
-- WebXR integration tests
-- State management tests
+    Click the "Start AR" button to enter augmented reality mode.
 
-### Building for Production
+3.  **Calibrate the Wall:**
 
-```bash
-# Build for production
-npm run build
+    *   The main menu will appear in front of you. Select "Wall Calibration" to begin the calibration process.
+    *   Follow the on-screen instructions to align the virtual wall with a physical wall in your environment.
 
-# Preview production build
-npm run preview
-```
+4.  **Define an Object:**
 
-## Future Improvements
+    *   Once the wall is calibrated, you can define objects by selecting "Object Definition" from the main menu.
+    *   Use your hands to draw a rectangle on the calibrated wall to define the object.
 
-The following refactoring opportunities have been identified to improve code quality and maintainability:
+5.  **Place Anchors:**
 
-1. **Split Large Components:**
-   - Refactor anchor-placement.js (860+ lines) into smaller, focused components
+    *   After defining an object, you can place anchors on it to create a more accurate representation of its position and orientation.
+    *   Select "Anchor Placement" from the main menu and follow the on-screen instructions to place the anchors.
 
-2. **Simplify Menu Navigation:**
-   - Replace large switch statement in menu-manager.js with data-driven navigation
+6.  **View Objects:**
 
-3. **Optimize DOM Manipulation:**
-   - Improve wall-plane.js grid pattern creation using single entity with custom shader
+    *   You can view a list of all defined objects and their properties by selecting "View Objects" from the main menu.
+    *   Drag the object into position and add mount points where the targets are 
 
-4. **Streamline UI Panel Creation:**
-   - Simplify panel creation process in menu-manager.js using A-Frame templating
+## Contributing
 
-5. **Standardize Event Handling:**
-   - Create consistent event structure for anchor status reporting
-
-6. **Reduce Code Duplication:**
-   - Extract common utility function for object lookup in anchor-placement.js
-
-7. **Optimize Vector Conversions:**
-   - Reduce redundant conversions in geometry.js functions
-
-8. **Improve Laser Control Logic:**
-   - Refactor complex laser control setup into separate component
-
-9. **Simplify State Management:**
-   - Replace large switch statement in wall-plane.js with declarative state mapping
-
-10. **Separate Menu Concerns:**
-    - Decouple menu stack management from rendering logic
-
-## XR Device Support
-
-- Meta Quest headsets in developer mode
-- Android devices with ImmersiveWebSimulator addon (using Chrome)
-- One day - support for iOS/Safari (ARKit)
-
-## Browser Requirements
-
-- WebXR-compatible browser
-- HTTPS connection (required for WebXR, use ngrok! <3)
-
-## License
-
-Dis Is Ours (TM) License
+Contributions are welcome! If you have any suggestions or find any issues, please open an issue or submit a pull request.
