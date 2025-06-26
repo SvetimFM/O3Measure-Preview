@@ -29,7 +29,13 @@ AFRAME.registerComponent('anchor-placement', {
     this.anchorColors = ['#F4B400', '#DB4437', '#4285F4', '#0F9D58'];
     
     // Get scene state system
-    this.sceneState = this.el.sceneEl.systems['scene-state'];
+    if (AFRAME.scenes[0].hasLoaded) {
+      this.sceneState = this.el.sceneEl.systems['scene-state'];
+    } else {
+      this.el.sceneEl.addEventListener('loaded', () => {
+        this.sceneState = this.el.sceneEl.systems['scene-state'];
+      });
+    }
     
     // Bind event handlers
     this.onAnchorAction = this.onAnchorAction.bind(this);

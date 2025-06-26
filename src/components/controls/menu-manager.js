@@ -49,6 +49,7 @@ AFRAME.registerComponent('menu-manager', {
   },
   
   createPanel: function() {
+    console.log('Menu Manager: Creating panel...');
     // Setup the UI container - either a grabbable backing or a regular entity
     if (this.data.grabbable) {
       // Create grabbable backing using box geometry as the container

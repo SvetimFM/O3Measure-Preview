@@ -13,6 +13,7 @@ const MainMenu = Object.create(BaseMenu);
 
 // Override render method with main menu content
 MainMenu.render = function() {
+  console.log('MainMenu: Rendering...');
   const { width, height, borderColor } = this.data;
   
   // Add title
