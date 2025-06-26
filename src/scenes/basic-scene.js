@@ -12,15 +12,11 @@ AFRAME.registerComponent('basic-scene', {
   },
   
   init: function() {
-    console.log('Initializing basic scene');
-    
     // Store references to created objects for cleanup
     this.sceneObjects = {};
 
     // Setup lighting
     this.setupLighting();
-    
-    console.log('Basic scene initialization complete');
   },
   
   update: function(oldData) {

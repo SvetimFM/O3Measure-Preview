@@ -5,7 +5,6 @@
 
 AFRAME.registerComponent('scene-manager', {
   init: function() {
-    console.log('Scene manager initialized');
     
     // Reference to scene
     this.sceneEl = this.el;
@@ -21,11 +20,9 @@ AFRAME.registerComponent('scene-manager', {
   },
   
   onEnterAR: function() {
-    console.log('Entered AR mode');
   },
   
   onExitAR: function() {
-    console.log('Exited AR mode');
   },
 
 });

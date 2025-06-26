@@ -1,5 +1,9 @@
 # O3Measure - Hand Tracking AR Measuring Tool
 
+> **🚧 Preview Release**: This is an early preview version of O3Measure. Features are still in development and may change. Please report any issues you encounter!
+
+[![License: CC BY-NC-ND 4.0](https://img.shields.io/badge/License-CC%20BY--NC--ND%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-nd/4.0/)
+
 O3Measure is a WebXR application designed for **augmented reality (AR) headsets with hand tracking** that allows users to measure and define objects in their physical environment using hand tracking. The application provides a user-friendly interface for calibrating walls, defining objects, and placing anchors to create accurate digital representations of physical objects.
 
 ## Features
@@ -10,9 +14,18 @@ O3Measure is a WebXR application designed for **augmented reality (AR) headsets 
 *   **Object Viewing:** View a list of all defined objects and their properties.
 *   **Hand Tracking:** Interact with the application using hand gestures.
 
+## Requirements
+
+*   WebXR-compatible AR headset (e.g., Meta Quest 3, Quest Pro)
+*   Hand tracking support enabled
+*   Modern web browser with WebXR support
+*   HTTPS connection (required for WebXR)
+
 ## Setup
 
-To run the O3Measure application, you will need to have Node.js and npm installed on your system. You will also need to use a tool like `ngrok` to create a secure tunnel to your local server. This is necessary because WebXR has strict CORS (Cross-Origin Resource Sharing) policies that prevent you from accessing local servers directly.
+### Development Setup
+
+To run the O3Measure application locally, you will need Node.js and npm installed on your system.
 
 1.  **Install Dependencies:**
 
@@ -20,25 +33,30 @@ To run the O3Measure application, you will need to have Node.js and npm installe
     npm install
     ```
 
-2.  **Start Ngrok:**
-
-    Open a new terminal window and run the following command to create a secure tunnel to your local server on port 3000:
-
-    ```bash
-    ngrok http 5173
-    ```
-
-    This will provide you with a public URL that you can use to access the application from your headset.
-
-3.  **Start the Development Server:**
-
-    In a separate terminal window, run the following command to start the development server:
+2.  **Start the Development Server:**
 
     ```bash
     npm run dev
     ```
 
-    The application will be available at `http://localhost:5173`.
+    The application will be available at `https://localhost:5173` (HTTPS is automatically configured).
+
+3.  **Access from AR Headset:**
+
+    For testing on an AR headset, you have two options:
+
+    **Option A: Local Network (Recommended)**
+    ```bash
+    npm run dev-host
+    ```
+    Then access the application using your computer's local IP address from your headset's browser.
+
+    **Option B: Public Tunnel**
+    Use a tool like ngrok to create a secure tunnel:
+    ```bash
+    ngrok http 5173
+    ```
+    Then use the provided public URL on your headset.
 
 ## Usage
 
@@ -72,6 +90,29 @@ To use the O3Measure application, you will need a WebXR-compatible headset with 
     *   You can view a list of all defined objects and their properties by selecting "View Objects" from the main menu.
     *   Drag the object into position and add mount points where the targets are 
 
+## Project Status
+
+This is a **preview release** (v0.1.0). The application is functional but still under active development. We welcome feedback and bug reports!
+
+### Roadmap
+
+- [ ] Controller support (currently hand tracking only)
+- [ ] Multi-wall calibration
+- [ ] Non-rectangular object shapes
+- [ ] Save/load functionality
+- [ ] Measurement history
+- [ ] Export capabilities
+
 ## Contributing
 
-Contributions are welcome! If you have any suggestions or find any issues, please open an issue or submit a pull request.
+Please see our [Contributing Guidelines](CONTRIBUTING.md) for details. Note that due to the current CC BY-NC-ND 4.0 license, code modifications are restricted in this preview release.
+
+## License
+
+This project is licensed under the Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+- Built with [A-Frame](https://aframe.io/) WebXR framework
+- Hand tracking powered by WebXR Device API
+- UI components using aframe-slice9-component
