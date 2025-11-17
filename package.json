@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:prod": "NODE_ENV=production vite build --mode production",
     "preview": "vite preview",
+    "preview:prod": "vite preview --mode production",
     "dev-host": "vite --host",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -14,7 +16,14 @@
     "test:utils": "node --experimental-vm-modules tests/run-tests.js utils",
     "test:components": "node --experimental-vm-modules tests/run-tests.js components",
     "test:state": "node --experimental-vm-modules tests/run-tests.js state",
-    "test:webxr": "node --experimental-vm-modules tests/run-tests.js webxr"
+    "test:webxr": "node --experimental-vm-modules tests/run-tests.js webxr",
+    "generate-icons": "node scripts/generate-icons.js",
+    "generate-icons:convert": "node scripts/generate-icons.js --convert",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
+    "clean": "rm -rf dist",
+    "prebuild": "npm run clean",
+    "postbuild": "echo 'Build complete! Deploy the dist/ folder to your hosting service.'"
   },
   "devDependencies": {
     "@eslint/js": "^9.24.0",
@@ -22,6 +31,7 @@
     "eslint-plugin-unused-imports": "^4.1.4",
     "globals": "^16.0.0",
     "jsdom": "^23.0.1",
+    "terser": "^5.44.1",
     "vite": "^6.0.5",
     "vite-plugin-mkcert": "^1.17.6",
     "vitest": "^1.6.1"

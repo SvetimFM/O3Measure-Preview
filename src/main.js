@@ -3,6 +3,10 @@
  * A-Frame based WebXR application with hand tracking focus
  */
 
+// Import error handling and performance monitoring
+import errorHandler from './utils/error-handler.js';
+import performanceMonitor from './utils/performance-monitor.js';
+
 // Import core components
 import './scenes/basic-scene.js';
 import './scenes/scene-manager.js';
@@ -12,6 +16,11 @@ import './state/scene-state.js';
 
 // Import custom components
 import './components/index.js';
+
+// Log application info
+console.log(`[O3Measure] Version: ${typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '0.1.0'}`);
+console.log(`[O3Measure] Build Date: ${typeof __BUILD_DATE__ !== 'undefined' ? __BUILD_DATE__ : 'Unknown'}`);
+console.log(`[O3Measure] Environment: ${typeof __IS_PRODUCTION__ !== 'undefined' && __IS_PRODUCTION__ ? 'Production' : 'Development'}`);
 
 document.addEventListener('DOMContentLoaded', function() {
 

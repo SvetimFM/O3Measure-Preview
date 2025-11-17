@@ -2,11 +2,60 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="mobile-web-app-capable" content="yes" />
+
+    <!-- Primary Meta Tags -->
     <title>O3Measure - Hand Tracking AR Measuring Tool</title>
-    
+    <meta name="title" content="O3Measure - Hand Tracking AR Measuring Tool" />
+    <meta name="description" content="Professional WebXR augmented reality measuring tool with hand tracking for Meta Quest devices. Calibrate walls, define objects, and measure your environment with precision." />
+    <meta name="keywords" content="WebXR, AR, augmented reality, Meta Quest, hand tracking, measuring tool, spatial computing, VR" />
+    <meta name="author" content="O3Measure" />
+    <meta name="robots" content="index, follow" />
+
+    <!-- Viewport & Mobile Optimization -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="format-detection" content="telephone=no" />
+
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#15ACCF" />
+    <meta name="apple-mobile-web-app-title" content="O3Measure" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+
+    <!-- Icons -->
+    <link rel="icon" type="image/svg+xml" href="/icons/icon.svg" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192x192.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512x512.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-192x192.png" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://o3measure.app/" />
+    <meta property="og:title" content="O3Measure - Hand Tracking AR Measuring Tool" />
+    <meta property="og:description" content="Professional WebXR augmented reality measuring tool with hand tracking for Meta Quest devices." />
+    <meta property="og:image" content="/icons/icon-512x512.png" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://o3measure.app/" />
+    <meta property="twitter:title" content="O3Measure - Hand Tracking AR Measuring Tool" />
+    <meta property="twitter:description" content="Professional WebXR augmented reality measuring tool with hand tracking for Meta Quest devices." />
+    <meta property="twitter:image" content="/icons/icon-512x512.png" />
+
+    <!-- WebXR & Performance Optimization -->
+    <meta name="xr-spatial-tracking" content="enabled" />
+    <meta http-equiv="origin-trial" content="" />
+
+    <!-- Security -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta http-equiv="X-Frame-Options" content="SAMEORIGIN" />
+    <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), interest-cohort=()" />
+
+    <!-- DNS Prefetch for Performance -->
+    <link rel="dns-prefetch" href="https://aframe.io" />
+    <link rel="preconnect" href="https://aframe.io" crossorigin />
+
     <!-- Load A-Frame script -->
     <script src="https://aframe.io/releases/1.7.0/aframe.min.js"></script>
     
@@ -98,5 +147,48 @@
 
     <!-- Script entry point -->
     <script type="module" src="/src/main.js"></script>
+
+    <!-- Service Worker Registration -->
+    <script>
+      // Register service worker for offline support and performance
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then((registration) => {
+              console.log('[PWA] Service Worker registered successfully:', registration.scope);
+
+              // Check for updates
+              registration.addEventListener('updatefound', () => {
+                const newWorker = registration.installing;
+                console.log('[PWA] Service Worker update found');
+
+                newWorker.addEventListener('statechange', () => {
+                  if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                    console.log('[PWA] New version available! Refresh to update.');
+                    // Optionally notify the user about the update
+                  }
+                });
+              });
+            })
+            .catch((error) => {
+              console.warn('[PWA] Service Worker registration failed:', error);
+            });
+        });
+      }
+
+      // Handle PWA installation prompt
+      let deferredPrompt;
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        console.log('[PWA] Install prompt available');
+        // You can show a custom install button here if desired
+      });
+
+      window.addEventListener('appinstalled', () => {
+        console.log('[PWA] App installed successfully');
+        deferredPrompt = null;
+      });
+    </script>
   </body>
 </html>

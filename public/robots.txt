@@ -1,0 +1,12 @@
+# robots.txt for O3Measure
+
+# Allow all crawlers
+User-agent: *
+Allow: /
+
+# Disallow service worker and config files
+Disallow: /sw.js
+Disallow: /_headers
+
+# Sitemap (update with your actual domain)
+# Sitemap: https://o3measure.app/sitemap.xml

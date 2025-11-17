@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Background -->
+  <rect width="512" height="512" fill="#15ACCF" rx="64"/>
+
+  <!-- Measuring tool icon -->
+  <g transform="translate(128, 128)">
+    <!-- Ruler -->
+    <rect x="20" y="100" width="220" height="60" fill="#ffffff" rx="8"/>
+
+    <!-- Ruler markings -->
+    <line x1="40" y1="100" x2="40" y2="120" stroke="#15ACCF" stroke-width="4"/>
+    <line x1="60" y1="100" x2="60" y2="115" stroke="#15ACCF" stroke-width="3"/>
+    <line x1="80" y1="100" x2="80" y2="120" stroke="#15ACCF" stroke-width="4"/>
+    <line x1="100" y1="100" x2="100" y2="115" stroke="#15ACCF" stroke-width="3"/>
+    <line x1="120" y1="100" x2="120" y2="120" stroke="#15ACCF" stroke-width="4"/>
+    <line x1="140" y1="100" x2="140" y2="115" stroke="#15ACCF" stroke-width="3"/>
+    <line x1="160" y1="100" x2="160" y2="120" stroke="#15ACCF" stroke-width="4"/>
+    <line x1="180" y1="100" x2="180" y2="115" stroke="#15ACCF" stroke-width="3"/>
+    <line x1="200" y1="100" x2="200" y2="120" stroke="#15ACCF" stroke-width="4"/>
+    <line x1="220" y1="100" x2="220" y2="115" stroke="#15ACCF" stroke-width="3"/>
+
+    <!-- Hand icon -->
+    <g transform="translate(80, 20)">
+      <circle cx="40" cy="40" r="35" fill="#ffffff" opacity="0.9"/>
+      <path d="M 40 15 L 40 50 M 25 40 L 40 40 L 50 30" stroke="#15ACCF" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+
+    <!-- AR indicator -->
+    <circle cx="200" cy="40" r="15" fill="#ffffff"/>
+    <text x="200" y="47" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#15ACCF" text-anchor="middle">AR</text>
+  </g>
+</svg>

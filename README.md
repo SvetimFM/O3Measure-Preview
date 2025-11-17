@@ -99,9 +99,49 @@ To use the O3Measure application, you will need a WebXR-compatible headset with 
     *   You can view a list of all defined objects and their properties by selecting "View Objects" from the main menu.
     *   Drag the object into position and add mount points where the targets are 
 
+## Production Deployment
+
+O3Measure is **production-ready** for Meta Quest devices! 🚀
+
+### Production Features
+
+✅ **PWA Support** - Installable as a Progressive Web App
+✅ **Offline Capability** - Service worker for offline functionality
+✅ **Performance Optimized** - Optimized build with code splitting and minification
+✅ **Error Handling** - Comprehensive error tracking and logging
+✅ **Security Headers** - Production-grade security configuration
+✅ **Meta Quest Optimized** - Foveated rendering and performance monitoring
+
+### Quick Deploy
+
+```bash
+# Install dependencies
+npm install
+
+# Generate icons (or use online tool)
+npm run generate-icons:convert
+
+# Build for production
+npm run build:prod
+
+# Preview production build
+npm run preview:prod
+
+# Deploy dist/ folder to your hosting service
+```
+
+For detailed deployment instructions, see [DEPLOYMENT.md](DEPLOYMENT.md).
+
+### Supported Hosting Platforms
+
+- **Netlify** (Recommended) - Automatic HTTPS and CDN
+- **Vercel** - Edge network deployment
+- **GitHub Pages** - Free hosting with custom domain
+- **Custom Server** - NGINX/Apache configurations provided
+
 ## Project Status
 
-This is a **preview release** (v0.1.0). The application is functional but still under active development. We welcome feedback and bug reports!
+This is **version 0.1.0** - production-ready for Meta Quest devices! The application is fully functional and optimized for AR experiences. We welcome feedback and bug reports!
 
 ### Roadmap
 
