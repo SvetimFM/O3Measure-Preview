@@ -3,6 +3,11 @@
  * Entry point for all components
  */
 
+// Modern Spatial UI Components (NEW!)
+import './ui/spatial-ui.js';
+import './ui/hand-ui-interaction.js';
+import './ui/modern-menu-example.js';
+
 // Control Components
 import './controls/menu-manager.js';
 import './controls/menu-system/index.js';
@@ -17,3 +22,4 @@ import './scene-understanding/draggable-wall-object.js';
 
 // Initialize all components
 console.log('O3Measure components initialized');
+console.log('Modern Spatial UI System loaded with Troika-Three-Text ✨');
