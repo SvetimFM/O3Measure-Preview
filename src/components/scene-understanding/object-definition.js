@@ -323,61 +323,105 @@ AFRAME.registerComponent('object-definition', {
     this.visualObject.appendChild(objectPlane);
   },
   
-  // Add dimensions text to the visualization
+  // Add dimensions text to the visualization (MODERN VERSION)
   addDimensionsText: function() {
     if (this.points.length < 3 || !this.visualObject) return;
-    
+
     // Calculate dimensions
     const p1 = this.points[0];
     const p2 = this.points[1];
     const p3 = this.points[2];
-    
+
     // Calculate width and height directly
     const width = p1.distanceTo(p2);
     const height = p2.distanceTo(p3);
-    
+
     // Calculate positions for dimension labels
-    const widthTextPos = new THREE.Vector3()
+    const widthMidpoint = new THREE.Vector3()
       .addVectors(p1, p2)
-      .divideScalar(2)
-      .add(new THREE.Vector3(0, 0.05, 0));
-    
-    const heightTextPos = new THREE.Vector3()
+      .divideScalar(2);
+
+    const heightMidpoint = new THREE.Vector3()
       .addVectors(p2, p3)
-      .divideScalar(2)
-      .add(new THREE.Vector3(0.05, 0, 0));
-    
-    // Center of the three points
+      .divideScalar(2);
+
+    // Calculate fourth point for center
+    const p4 = calculateFourthCorner(p1, p2, p3);
     const center = new THREE.Vector3()
-      .add(p1).add(p2).add(p3)
-      .divideScalar(3);
-    
-    // Create text elements
-    const widthText = createMeasurementText(width, widthTextPos, 'cm', {
-      color: '#FFFFFF',
-      scale: '0.1 0.1 0.1',
-      lookAt: '[camera]',
-      className: 'dimension-text'
+      .add(p1).add(p2).add(p3).add(p4)
+      .divideScalar(4);
+
+    // Create modern measurement display using measurement-display component
+    const measurementDisplay = document.createElement('a-entity');
+    measurementDisplay.setAttribute('measurement-display', {
+      width: width,
+      height: height,
+      showWidth: true,
+      showHeight: true,
+      showArea: true,
+      widthPosition: {
+        x: widthMidpoint.x,
+        y: widthMidpoint.y + 0.05,
+        z: widthMidpoint.z
+      },
+      heightPosition: {
+        x: heightMidpoint.x + 0.05,
+        y: heightMidpoint.y,
+        z: heightMidpoint.z
+      },
+      areaPosition: {
+        x: center.x,
+        y: center.y,
+        z: center.z
+      },
+      labelColor: '#FFFFFF',
+      areaColor: '#15ACCF',
+      precision: 1,
+      showLabels: true
     });
-    this.visualObject.appendChild(widthText);
-    
-    const heightText = createMeasurementText(height, heightTextPos, 'cm', {
-      color: '#FFFFFF',
-      scale: '0.1 0.1 0.1',
-      lookAt: '[camera]',
-      className: 'dimension-text'
+
+    this.visualObject.appendChild(measurementDisplay);
+
+    // Add professional dimension arrows
+    this.addDimensionArrows();
+  },
+
+  // Add professional dimension arrows with lines
+  addDimensionArrows: function() {
+    if (this.points.length < 3 || !this.visualObject) return;
+
+    const p1 = this.points[0];
+    const p2 = this.points[1];
+    const p3 = this.points[2];
+    const p4 = calculateFourthCorner(p1, p2, p3);
+
+    // Width dimension arrow (top edge)
+    const widthArrow = document.createElement('a-entity');
+    widthArrow.setAttribute('dimension-line', {
+      start: p1,
+      end: p2,
+      offset: 0.08,
+      lineColor: '#15ACCF',
+      textColor: '#FFFFFF',
+      showArrows: true,
+      showLabel: false, // Already shown by measurement-display
+      precision: 1
     });
-    this.visualObject.appendChild(heightText);
-    
-    // Create area text in center of rectangle
-    const areaCmSq = (width * height * 10000).toFixed(0); // cm²
-    const areaText = createFloatingText(`${areaCmSq} cm²`, center, {
-      color: '#FFFFFF',
-      scale: '0.1 0.1 0.1',
-      lookAt: '[camera]',
-      className: 'area-text'
+    this.visualObject.appendChild(widthArrow);
+
+    // Height dimension arrow (right edge)
+    const heightArrow = document.createElement('a-entity');
+    heightArrow.setAttribute('dimension-line', {
+      start: p2,
+      end: p3,
+      offset: 0.08,
+      lineColor: '#15ACCF',
+      textColor: '#FFFFFF',
+      showArrows: true,
+      showLabel: false, // Already shown by measurement-display
+      precision: 1
     });
-    this.visualObject.appendChild(areaText);
+    this.visualObject.appendChild(heightArrow);
   },
   
   // Finalize and save the defined object

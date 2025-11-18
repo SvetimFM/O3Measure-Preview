@@ -40,6 +40,7 @@
     "aframe": "^1.7.0",
     "aframe-slice9-component": "^1.0.0",
     "express": "^4.21.2",
+    "jspdf": "^3.0.3",
     "three": "^0.173.0",
     "three-mesh-ui": "^6.5.4",
     "troika-three-text": "^0.52.4",

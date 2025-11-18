@@ -9,11 +9,13 @@ import * as geometry from './geometry.js';
 import * as interaction from './interaction.js';
 import * as uiElements from './ui-elements.js';
 import { Colors } from './constants.js';
+import * as units from './units.js';
 
 export {
   events,
   geometry,
   interaction,
   uiElements,
-  Colors
+  Colors,
+  units
 };
